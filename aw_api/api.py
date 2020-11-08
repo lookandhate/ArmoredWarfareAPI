@@ -20,8 +20,9 @@ class API:
         # Div with text shows that player with given nickname does not exist
         self.__PLAYER_NOT_EXISTS = '<div class="node_notice warn border">Пользователь не найден!</div>'
         # base url for player statistics
-        self.__user_stats_url = 'https://aw.mail.ru/dynamic/user/?a=stats'
+        self.__user_stats_url = 'https://armata.my.games/dynamic/user/?a=stats'
         # Session that will contain cookies
+        self.__battalion_stats_url = 'https://armata.my.games/dynamic/aliance/index.php?a=index'
         self.__session: requests.Session = requests.Session()
         # Dict with cookies
         self.__cookie: Union[dict, list, None] = None
@@ -127,6 +128,9 @@ class API:
 
         return {'winrate': float(winrate_stat[:-1]), 'battles': battle_stats,
                 'damage': float(avg_dmg), 'clantag': battalion, 'nickname': nickname}
+
+    def get_battalion_players(self, battalion_id: int) -> list:
+
 
     def get_statistic_by_nickname(self, nickname, mode=0, data=0, tank_id=0, day=0):
         """
