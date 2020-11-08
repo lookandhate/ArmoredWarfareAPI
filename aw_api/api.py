@@ -4,7 +4,8 @@ from typing import Union
 import requests
 from bs4 import BeautifulSoup
 
-from .exceptions import UserHasClosedStatisticsException, UserNotFoundException, BadHTTPStatusCode, NotAuthException
+from .exceptions import UserHasClosedStatisticsException, UserNotFoundException, BadHTTPStatusCode, NotAuthException, \
+    BattalionNotFound
 
 
 class API:
@@ -15,6 +16,7 @@ class API:
 
         # Paragraph that shows if we are not authenticated on site
         self.__NOT_AUTH_CHECK = '<p>Для просмотра данной страницы вам необходимо авторизоваться или <a href="/user/register/">зарегистрироваться</a> на сайте.</p>'
+        self.__NOT_AUTH_CHECK_BATTALION = '<div class="node_notice warn border">Необходимо авторизоваться.</div>'
         # Div with text shows that user closed his statistics
         self.__CLOSED_STAT = '<div class="node_notice warn border">Пользователь закрыл доступ!</div>'
         # Div with text shows that player with given nickname does not exist
@@ -53,6 +55,8 @@ class API:
         :param url: URL to retrieve
         :return: string with decoded HTML page
         """
+        print(url)
+
         request = self.__session.get(url, cookies=self.__cookie)
         if request.status_code == 200:
             page = request.content.decode('utf-8')
@@ -129,8 +133,39 @@ class API:
         return {'winrate': float(winrate_stat[:-1]), 'battles': battle_stats,
                 'damage': float(avg_dmg), 'clantag': battalion, 'nickname': nickname}
 
-    def get_battalion_players(self, battalion_id: int) -> list:
+    def __parse_battalion_page_for_nicknames(self, page: str) -> list:
+        soup = BeautifulSoup(page, 'html.parser')
+        if page == '{"redirect":"\/alliance\/top"}':
+            raise BattalionNotFound("Battalion with given ID was not found")
+        notifications = list(soup.find_all('p'))
+        if not notifications:
+            notifications = soup.find_all('div')
+        notifications = list(notifications)
 
+        # Check if we authenticated (if not, then notifications[1] will be equal to __NOT_AUTH_CHECK_BATTALION )
+        if self.__NOT_AUTH_CHECK_BATTALION == str(notifications[1]):
+            raise NotAuthException('I am not authenticated on aw.mail.ru')
+        # Get all divs with cont class( Cont class is class for player information)
+        data = soup.find_all('div', {'class': 'cont'})
+        # This is the list where we gonna keep track of players
+        battalion_players = []
+
+        # YE I KNOW THIS IS HORRIBLE AS FUCK
+        #
+        for item in str(data[0]).split('\n'):
+            if item.startswith('<div><a href="/user/stats'):
+                _, player_id, nickname, __ = item.replace('<div><a href="/user/stats?', '').replace('">', ' ').replace(
+                    '</a><br/', ' ') \
+                    .replace('data=', ' ').split(' ')
+                player = {'id': int(player_id), 'nickname': nickname}
+                battalion_players.append(player)
+
+        return battalion_players
+
+    def get_battalion_players(self, battalion_id: int) -> list:
+        page = self.__get_page(f'{self.__battalion_stats_url}&data={battalion_id}')
+        battalion_players = self.__parse_battalion_page_for_nicknames(page)
+        return battalion_players
 
     def get_statistic_by_nickname(self, nickname, mode=0, data=0, tank_id=0, day=0):
         """

@@ -140,3 +140,5 @@ cython_debug/
 # Pycharm folder
 .idea
 /tests/
+cookies.json
+test_module.py

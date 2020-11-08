@@ -10,6 +10,11 @@ class UserNotFoundException(BaseStatsServiceException):
         super().__init__(*args, **kwargs)
 
 
+class BattalionNotFound(BaseStatsServiceException):
+    """Raises whenever battalion with given id was not found"""
+    pass
+
+
 class UserHasClosedStatisticsException(BaseStatsServiceException):
     """Raises when requested user has closed stats"""
     pass
