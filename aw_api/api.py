@@ -4,7 +4,7 @@ from typing import Union
 import requests
 from bs4 import BeautifulSoup
 
-from .exceptions import *
+from .exceptions import UserHasClosedStatisticsException, UserNotFoundException, BadHTTPStatusCode, NotAuthException
 
 
 class API:
@@ -52,11 +52,11 @@ class API:
         :param url: URL to retrieve
         :return: string with decoded HTML page
         """
-        r = self.__session.get(url, cookies=self.__cookie)
-        if r.status_code == 200:
-            page = r.content.decode('utf-8')
+        request = self.__session.get(url, cookies=self.__cookie)
+        if request.status_code == 200:
+            page = request.content.decode('utf-8')
             return page
-        raise BadHTTPStatusCode(f'Got non 200 status code: {r.status_code}', r.status_code)
+        raise BadHTTPStatusCode(f'Got non 200 status code: {request.status_code}', request.status_code)
 
     def __get_player_statistic_page(self, nickname: str, mode: int, data: int, tank_id: id, day: int = 0,
                                     ajax: int = 0) -> str:
@@ -89,21 +89,21 @@ class API:
 
         # Парсинг страницы
         soup = BeautifulSoup(page, "html.parser")
-        ss = list(soup.find_all('p'))
-        if not ss:
-            ss = soup.find_all('div')
-        ss = list(ss)
+        notifications = list(soup.find_all('p'))
+        if not notifications:
+            notifications = soup.find_all('div')
+        notifications = list(notifications)
 
-        # Check if we authenticated (if not, then ss[0] will be equal to NOT_AUTH_CHECK )
-        if self.__NOT_AUTH_CHECK == str(ss[0]):
+        # Check if we authenticated (if not, then notifications[0] will be equal to NOT_AUTH_CHECK )
+        if self.__NOT_AUTH_CHECK == str(notifications[0]):
             raise NotAuthException('I am not authenticated on aw.mail.ru')
 
-        # Check if user exists( if user does not exist, then ss[0] will be equal to PLAYER_NOT_EXISTS )
-        if self.__PLAYER_NOT_EXISTS == str(ss[0]):
+        # Check if user exists( if user does not exist, then notifications[0] will be equal to PLAYER_NOT_EXISTS )
+        if self.__PLAYER_NOT_EXISTS == str(notifications[0]):
             raise UserNotFoundException('User with given nickname was not found')
 
         # Check did user closed stats
-        if '<div class="node_notice warn border">Пользователь закрыл доступ!</div>' == str(ss[0]):
+        if '<div class="node_notice warn border">Пользователь закрыл доступ!</div>' == str(notifications[0]):
             raise UserHasClosedStatisticsException('User with given nickname closed his stats')
 
         nickname = self.__clean_html(str(soup.find("div", {"class": "name"}))).split('\n')[1]
