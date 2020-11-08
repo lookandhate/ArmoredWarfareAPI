@@ -1,7 +1,8 @@
-import requests
 import re
-from bs4 import BeautifulSoup
 from typing import Union
+
+import requests
+from bs4 import BeautifulSoup
 
 from .exceptions import *
 
@@ -16,8 +17,10 @@ class API:
         self.__NOT_AUTH_CHECK = '<p>Для просмотра данной страницы вам необходимо авторизоваться или <a href="/user/register/">зарегистрироваться</a> на сайте.</p>'
         # Div with text shows that user closed his statistics
         self.__CLOSED_STAT = '<div class="node_notice warn border">Пользователь закрыл доступ!</div>'
+        # Div with text shows that player with given nickname does not exist
+        self.__PLAYER_NOT_EXISTS = '<div class="node_notice warn border">Пользователь не найден!</div>'
         # base url for player statistics
-        self.__stats_url = 'https://aw.mail.ru/dynamic/user/?a=stats'
+        self.__user_stats_url = 'https://aw.mail.ru/dynamic/user/?a=stats'
         # Session that will contain cookies
         self.__session: requests.Session = requests.Session()
         # Dict with cookies
@@ -25,7 +28,7 @@ class API:
         if raw_cookie:
             self.__cookie = self.__prepare_cookie(raw_cookie)
 
-    # Отчистка HTML от тэгов
+    # Clean HTML from tags to extract only data
     @staticmethod
     def __clean_html(raw_html):
         cleanr = re.compile('<.*?>')
@@ -46,11 +49,10 @@ class API:
 
     def __get_page(self, url):
         """
-        :param url: URL to retrive
+        :param url: URL to retrieve
         :return: string with decoded HTML page
         """
         r = self.__session.get(url, cookies=self.__cookie)
-        print(url)
         if r.status_code == 200:
             page = r.content.decode('utf-8')
             return page
@@ -69,10 +71,10 @@ class API:
 
         """
 
-        url = f'{self.__stats_url}&name={nickname}&mode={mode}&data={data}&type={tank_id}&day={day}&ajax={ajax}'
+        url = f'{self.__user_stats_url}&name={nickname}&mode={mode}&data={data}&type={tank_id}&day={day}&ajax={ajax}'
         return self.__get_page(url)
 
-    def __get_stat(self, page: str, nickname=None) -> dict:
+    def __get_player_statistics(self, page: str, nickname=None) -> dict:
         """
         :param page: string with HTML document
         :param nickname: Nickname of player to rise exception with
@@ -92,12 +94,12 @@ class API:
             ss = soup.find_all('div')
         ss = list(ss)
 
-        # Проверяем код страницы на премет строки NOT_AUTH_CHECK
+        # Check if we authenticated (if not, then ss[0] will be equal to NOT_AUTH_CHECK )
         if self.__NOT_AUTH_CHECK == str(ss[0]):
-            raise NotAuthException('__NOT_AUTH_CHECK = str(ss[0])')
+            raise NotAuthException('I am not authenticated on aw.mail.ru')
 
-        # Проверяем код страницы на предмет строки уведомляющей о том,что пользователя не сушествует
-        if '<div class="node_notice warn border">Пользователь не найден!</div>' == str(ss[0]):
+        # Check if user exists( if user does not exist, then ss[0] will be equal to PLAYER_NOT_EXISTS )
+        if self.__PLAYER_NOT_EXISTS == str(ss[0]):
             raise UserNotFoundException('User with given nickname was not found')
 
         # Check did user closed stats
@@ -126,10 +128,19 @@ class API:
         return {'winrate': float(winrate_stat[:-1]), 'battles': battle_stats,
                 'damage': float(avg_dmg), 'clantag': battalion, 'nickname': nickname}
 
-    def get_statistic_by_nickname(self, nickname, mode=0, data=0, type_tank=0, day=0):
+    def get_statistic_by_nickname(self, nickname, mode=0, data=0, tank_id=0, day=0):
+        """
+
+        :param nickname: Nickname of user to find
+        :param mode: Game mode Number from 0 to 4 {pvp, pve, low, glops, ranked}
+        :param data: CSA ID of player to find(overwrites user nickname) if not 0
+        :param tank_id: staticID of tank to find for(0 means overall stat for mode)
+        :param day: Filter stats by some date/battle count
+        :return: dict with Player statistics
+        """
+
         # Get page
-        page = self.__get_player_statistic_page(nickname, mode, data, type_tank, day)
-        # print(page)
+        page = self.__get_player_statistic_page(nickname, mode, data, tank_id, day)
         # Parse the page
-        parsed_data = self.__get_stat(page, nickname)
+        parsed_data = self.__get_player_statistics(page, nickname)
         return parsed_data
