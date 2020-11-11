@@ -55,7 +55,6 @@ class API:
         :param url: URL to retrieve
         :return: string with decoded HTML page
         """
-        print(url)
 
         request = self.__session.get(url, cookies=self.__cookie)
         if request.status_code == 200:
@@ -119,7 +118,8 @@ class API:
             battalion = None
 
         battle_stats = str(soup.find("div", {"class": "total"}))
-        battle_stats = int(self.__clean_html(battle_stats).split()[-1].replace('сыграно', ''))
+        battle_stats = self.__clean_html(battle_stats).split()[-1].replace('сыграно', '')
+        battle_stats = int(battle_stats) if battle_stats else 0
 
         avg_dmg = soup.findAll("div", {"class": "list_pad"})
         clear = self.__clean_html(str(avg_dmg[3]))
