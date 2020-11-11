@@ -117,9 +117,9 @@ class API:
         if len(battalion) == 0:
             battalion = None
 
-        battle_stats = str(soup.find("div", {"class": "total"}))
-        battle_stats = self.__clean_html(battle_stats).split()[-1].replace('сыграно', '')
-        battle_stats = int(battle_stats) if battle_stats else 0
+        battles = str(soup.find("div", {"class": "total"}))
+        battles = self.__clean_html(battles).split()[-1].replace('сыграно', '')
+        battles = int(battles) if battles else 0
 
         avg_dmg = soup.findAll("div", {"class": "list_pad"})
         clear = self.__clean_html(str(avg_dmg[3]))
@@ -130,7 +130,7 @@ class API:
         winrate_stat = str(soup.find("span", {"class": "yellow"}))
         winrate_stat = self.__clean_html(winrate_stat)
 
-        return {'winrate': float(winrate_stat[:-1]), 'battles': battle_stats,
+        return {'winrate': float(winrate_stat[:-1]), 'battles': battles,
                 'damage': float(avg_dmg), 'clantag': battalion, 'nickname': nickname}
 
     def __parse_battalion_page_for_nicknames(self, page: str) -> list:
