@@ -1,5 +1,10 @@
 from setuptools import setup
 
+requirements = []
+with open('requirements.txt') as f:
+  requirements = f.read().splitlines()
+
+
 setup(
     name='aw_api',
     version='0.1.0',
@@ -8,5 +13,7 @@ setup(
     license='MIT',
     author='https://github.com/lookandhate',
     author_email='',
-    description='Armored Warfare statistics API'
+    description='Armored Warfare statistics API',
+    install_requires=requirements,
+    python_requires='>3.6.0'
 )
