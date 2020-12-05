@@ -1,5 +1,5 @@
 import re
-from typing import Union
+from typing import Union, Dict, List
 
 import requests
 from bs4 import BeautifulSoup
@@ -9,13 +9,15 @@ from .exceptions import UserHasClosedStatisticsException, UserNotFoundException,
 
 
 class API:
-    def __init__(self, raw_cookie: Union[dict, list] = None):
+    def __init__(self, raw_cookie: Union[Dict, List] = None):
         """
         :param raw_cookie: dict containing exported with "EditThisCookie" Chrome extension cookie from aw.mail.ru
         """
 
         # Paragraph that shows if we are not authenticated on site
-        self.__NOT_AUTH_CHECK = '<p>Для просмотра данной страницы вам необходимо авторизоваться или <a href="/user/register/">зарегистрироваться</a> на сайте.</p>'
+        self.__NOT_AUTH_CHECK = [
+            '<p>Для просмотра данной страницы вам необходимо авторизоваться или <a href="/user/register/">зарегистрироваться</a> на сайте.</p>',
+            '<p>Для просмотра данной страницы вам необходимо авторизоваться или <a href="" onclick="__GEM.showSignup();return false;" target="_blank">зарегистрироваться</a> на сайте.</p>']
         self.__NOT_AUTH_CHECK_BATTALION = '<div class="node_notice warn border">Необходимо авторизоваться.</div>'
         # Div with text shows that user closed his statistics
         self.__CLOSED_STAT = '<div class="node_notice warn border">Пользователь закрыл доступ!</div>'
@@ -27,7 +29,7 @@ class API:
         self.__battalion_stats_url = 'https://armata.my.games/dynamic/aliance/index.php?a=index'
         self.__session: requests.Session = requests.Session()
         # Dict with cookies
-        self.__cookie: Union[dict, list, None] = None
+        self.__cookie: Union[Dict, List, None] = None
         if raw_cookie:
             self.__cookie = self.__prepare_cookie(raw_cookie)
 
@@ -39,7 +41,7 @@ class API:
         return cleantext
 
     @staticmethod
-    def __prepare_cookie(raw_cookie: Union[dict, list]) -> dict:
+    def __prepare_cookie(raw_cookie: Union[Dict, List]) -> Dict:
         """
         :param raw_cookie: Raw cookie from EditThisCookie
         :return: Dict with "cleaned" cookies
@@ -76,12 +78,13 @@ class API:
         """
 
         url = f'{self.__user_stats_url}&name={nickname}&mode={mode}&data={data}&type={tank_id}&day={day}&ajax={ajax}'
-        return self.__get_page(url)
+        page = self.__get_page(url)
+        return page
 
-    def __get_player_statistics(self, page: str, nickname=None) -> dict:
+    def __get_player_statistics(self, page: str, nickname=None) -> Dict:
         """
         :param page: string with HTML document
-        :param nickname: Nickname of player to rise exception with
+        :param nickname: Nickname of player to raise exception with
 
         :return: dict with user data, where
         winrate: float - Player win rate in percents
@@ -99,7 +102,7 @@ class API:
         notifications = list(notifications)
 
         # Check if we authenticated (if not, then notifications[0] will be equal to NOT_AUTH_CHECK )
-        if self.__NOT_AUTH_CHECK == str(notifications[0]):
+        if str(notifications[0]) in self.__NOT_AUTH_CHECK:
             raise NotAuthException('I am not authenticated on aw.mail.ru')
 
         # Check if user exists( if user does not exist, then notifications[0] will be equal to PLAYER_NOT_EXISTS )
@@ -117,9 +120,9 @@ class API:
         if len(battalion) == 0:
             battalion = None
 
-        battles = str(soup.find("div", {"class": "total"}))
-        battles = self.__clean_html(battles).split()[-1].replace('сыграно', '')
-        battles = int(battles) if battles else 0
+        battle_stats = str(soup.find("div", {"class": "total"}))
+        battle_stats = self.__clean_html(battle_stats).split()[-1].replace('сыграно', '')
+        battle_stats = int(battle_stats) if battle_stats else 0
 
         avg_dmg = soup.findAll("div", {"class": "list_pad"})
         clear = self.__clean_html(str(avg_dmg[3]))
@@ -130,12 +133,12 @@ class API:
         winrate_stat = str(soup.find("span", {"class": "yellow"}))
         winrate_stat = self.__clean_html(winrate_stat)
 
-        return {'winrate': float(winrate_stat[:-1]), 'battles': battles,
+        return {'winrate': float(winrate_stat[:-1]), 'battles': battle_stats,
                 'damage': float(avg_dmg), 'clantag': battalion, 'nickname': nickname}
 
-    def __parse_battalion_page_for_nicknames(self, page: str) -> list:
+    def __parse_battalion_page_for_nicknames(self, page: str) -> List:
         soup = BeautifulSoup(page, 'html.parser')
-        if page == '{"redirect":"\/alliance\/top"}':
+        if page == r'{"redirect":"\/alliance\/top"}':
             raise BattalionNotFound("Battalion with given ID was not found")
         notifications = list(soup.find_all('p'))
         if not notifications:
@@ -162,20 +165,25 @@ class API:
 
         return battalion_players
 
-    def get_battalion_players(self, battalion_id: int) -> list:
+    def get_battalion_players(self, battalion_id: int) -> List:
+        """
+        Retrieves battalion players
+        :param battalion_id: ID of battalion
+        :return: list of players in this battalion
+        """
         page = self.__get_page(f'{self.__battalion_stats_url}&data={battalion_id}')
         battalion_players = self.__parse_battalion_page_for_nicknames(page)
         return battalion_players
 
     def get_statistic_by_nickname(self, nickname, mode=0, data=0, tank_id=0, day=0):
         """
-
+        Retrieves player statistics in mode on specified tank by given nickname or playerID
         :param nickname: Nickname of user to find
         :param mode: Game mode Number from 0 to 4 {pvp, pve, low, glops, ranked}
         :param data: CSA ID of player to find(overwrites user nickname) if not 0
         :param tank_id: staticID of tank to find for(0 means overall stat for mode)
         :param day: Filter stats by some date/battle count
-        :return: dict with Player statistics
+        :return: :dict: Dictionary contains player statistics
         """
 
         # Get page
@@ -183,3 +191,6 @@ class API:
         # Parse the page
         parsed_data = self.__get_player_statistics(page, nickname)
         return parsed_data
+
+
+AW = API
