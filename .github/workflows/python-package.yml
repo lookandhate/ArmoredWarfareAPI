@@ -16,7 +16,7 @@ jobs:
     steps:
       - uses: actions/checkout@v2
       - name: Decrypt large secret
-        run: /home/runner/work/ArmoredWarfareAPI/ArmoredWarfareAPI/github/scripts/decrypt_secret.sh
+        run: /home/runner/work/ArmoredWarfareAPI/ArmoredWarfareAPI/.github/scripts/decrypt_secret.sh
         env:
           LARGE_SECRET_PASSPHRASE: ${{ secrets.LARGE_SECRET_PASSPHRASE }}
 
