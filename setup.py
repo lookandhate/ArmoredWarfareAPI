@@ -7,7 +7,7 @@ with open('requirements.txt') as f:
 
 setup(
     name='aw_api',
-    version='0.1.0',
+    version='0.2.0',
     packages=['aw_api'],
     url='https://github.com/lookandhate/ArmoredWarfareAPI',
     license='MIT',

@@ -142,3 +142,4 @@ cython_debug/
 /tests/
 cookies.json
 test_module.py
+fake_cookies.json
