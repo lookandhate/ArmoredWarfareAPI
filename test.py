@@ -2,15 +2,13 @@ import json
 
 from aw_api import API
 
-cookies = json.loads(open('secret_cookies.json').read())
+cookies = json.loads(open('cookies.json').read())
 
 client = API(cookies)
 
 test_data = {
     'battalion_players_0': [{'id': 622893703, 'nickname': 'iLuvSasha'}]
 }
-
-
 
 
 def test_general():
