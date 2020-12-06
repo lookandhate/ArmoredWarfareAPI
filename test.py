@@ -2,7 +2,7 @@ import json
 
 from aw_api import API
 
-cookies = json.loads(open('cookies.json').read())
+cookies = json.loads(open('test_cookies.json').read())
 
 client = API(cookies)
 
