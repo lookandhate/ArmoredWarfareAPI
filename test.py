@@ -3,7 +3,7 @@ import os
 from aw_api import API
 
 if os.getenv('HOME'):
-    cookies = json.loads(open('/home/runner/work/ArmoredWarfareAPI/ArmoredWarfareAPI/test_cookies.json').read())
+    cookies = json.loads(open('test_cookies.json').read())
 else:
     cookies = json.loads(open('cookies.json').read())
 
