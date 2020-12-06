@@ -64,9 +64,9 @@ print("I've played {0} battles in PvE, won {1} battles of 100 and deal {2} damag
 
 3) You can specify tank too: just pass ``tank_id`` key-word parameter.
 ```python
-my_pve_statistics = aw_stats.get_statistic_by_nickname(nickname='MyNickname', mode=3, tank_id=157)
+my_glops_statistics = aw_stats.get_statistic_by_nickname(nickname='MyNickname', mode=3, tank_id=157)
 print("I've played {0} battles in PvE on XM1A3, won {1} battles of 100 and deal {2} damage in average".format(
-    my_pve_statistics['battles'], my_pve_statistics['winrate'], my_pve_statistics['damage']))
+    my_glops_statistics['battles'], my_glops_statistics['winrate'], my_glops_statistics['damage']))
 ```
 Code Above will print your GLoPS statistics on XM1A3
 
