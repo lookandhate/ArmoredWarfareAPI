@@ -1,6 +1,6 @@
 import json
 import os
-
+from aw_api import API
 if os.getenv('LARGE_SECRET_PASSPHRASE'):
     cookies = json.loads(open('/home/runner/work/ArmoredWarfareAPI/ArmoredWarfareAPI/test_cookies.json').read())
 else:
