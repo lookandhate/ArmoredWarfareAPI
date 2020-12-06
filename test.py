@@ -8,7 +8,7 @@ else:
 
 raise Exception(os.getenv('LARGE_SECRET_PASSPHRASE'))
 
-client = aw_api.API(cookies)
+client = API(cookies)
 
 test_data = {
     'battalion_players_0': [{'id': 622893703, 'nickname': 'iLuvSasha'}]
