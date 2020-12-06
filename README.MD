@@ -70,4 +70,6 @@ print("I've played {0} battles in PvE on XM1A3, won {1} battles of 100 and deal 
 ```
 Code Above will print your GLoPS statistics on XM1A3
 
+*I can't provide IDs for all tanks in the game for now, but you can dig them in Game.log or from source code of statistic page at armata.my.games*
+
 
