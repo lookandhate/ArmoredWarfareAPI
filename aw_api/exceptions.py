@@ -1,8 +1,8 @@
-class BaseStatsServiceException(Exception):
-    """base exception for statistics parser"""
+class BaseAWStatsException(Exception):
+    """Base exception for statistics parser"""
 
 
-class UserNotFoundException(BaseStatsServiceException):
+class UserNotFoundException(BaseAWStatsException):
     """Raises whenever user with given nickname was not found"""
 
     def __init__(self, nickname, *args, **kwargs):
@@ -10,22 +10,22 @@ class UserNotFoundException(BaseStatsServiceException):
         super().__init__(*args, **kwargs)
 
 
-class BattalionNotFound(BaseStatsServiceException):
+class BattalionNotFound(BaseAWStatsException):
     """Raises whenever battalion with given id was not found"""
     pass
 
 
-class UserHasClosedStatisticsException(BaseStatsServiceException):
+class UserHasClosedStatisticsException(BaseAWStatsException):
     """Raises when requested user has closed stats"""
     pass
 
 
-class NotAuthException(BaseStatsServiceException):
+class NotAuthException(BaseAWStatsException):
     """Raises if bot did not pass auth"""
     pass
 
 
-class BadHTTPStatusCode(BaseStatsServiceException):
+class BadHTTPStatusCode(BaseAWStatsException):
     def __init__(self, status_code, *args, **kwargs):
         super().__init__(*args, **kwargs)
         self.status_code = status_code

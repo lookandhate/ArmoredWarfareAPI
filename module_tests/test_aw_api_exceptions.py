@@ -4,7 +4,8 @@ import pytest
 import json
 
 from aw_api import API
-from aw_api import NotAuthException, UserNotFoundException, UserHasClosedStatisticsException, BattalionNotFound
+from aw_api.exceptions import NotAuthException, UserNotFoundException,\
+    UserHasClosedStatisticsException, BattalionNotFound
 
 if os.getenv('HOME'):
     cookies = json.loads(open('test_cookies.json').read())

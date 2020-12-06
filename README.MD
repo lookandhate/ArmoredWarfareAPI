@@ -31,7 +31,7 @@ Maybe there will be a PyPI package later.
 [cookie.json]: https://github.com/lookandhate/ArmoredWarfareAPI/blob/master/github_readmepage/cookies.json_example.png 
 
 ```python
-from aw_api.api import AW
+from aw_api.api import AW, API # API is just an alias for AW class
 
 __cookies = dict()  # Your cookies
 aw_stats = AW(__cookies)
@@ -73,3 +73,12 @@ Code Above will print your GLoPS statistics on XM1A3
 *I can't provide IDs for all tanks in the game for now, but you can dig them in Game.log or from source code of statistic page at armata.my.games*
 
 
+4) In case if something went wrong (Player was not found, player have his stats closed and etc, an Exception will be raised)
+Example:
+```python
+   player_not_found =  aw_stats.get_statistic_by_nickname(nickname='1')
+```
+Will raise ``aw_api.exceptions.UserNotFoundException`` Exception
+
+List of all possible exceptions:`` UserHasClosedStatisticsException, UserNotFoundException, BadHTTPStatusCode, NotAuthException, BattalionNotFound``
+And BaseAWStatsException base of all exceptions above
