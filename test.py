@@ -1,12 +1,11 @@
 import json
 import os
 from aw_api import API
-if os.getenv('LARGE_SECRET_PASSPHRASE'):
+
+if os.getenv('HOME'):
     cookies = json.loads(open('/home/runner/work/ArmoredWarfareAPI/ArmoredWarfareAPI/test_cookies.json').read())
 else:
     cookies = json.loads(open('cookies.json').read())
-
-raise Exception(os.getenv('LARGE_SECRET_PASSPHRASE'))
 
 client = API(cookies)
 
