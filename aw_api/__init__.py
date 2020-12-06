@@ -1,2 +1,2 @@
 from .api import API, AW
-import exceptions
+import aw_api.exceptions
