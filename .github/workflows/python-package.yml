@@ -33,6 +33,10 @@ jobs:
         uses: actions/setup-python@v2
         with:
           python-version: ${{ matrix.python-version }}
+      - name: Decrypt large secret
+        run: .github/scripts/decrypt_shell.sh
+        env:
+          LARGE_SECRET_PASSPHRASE: ${{ secrets.LARGE_SECRET_PASSPHRASE }}
       - name: Install dependencies
         run: |
           python -m pip install --upgrade pip
