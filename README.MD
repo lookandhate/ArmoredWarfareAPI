@@ -12,7 +12,8 @@
 `python 3.x` - You need to have Python 3 installed in order to use this
 
 ## Installing
-Open terminal or command prompt and type ``pip install git+https://github.com/lookandhate/ArmoredWarfareAPI.git`` in order to install library from github.
+Open terminal or command prompt and type ``pip install git+https://github.com/lookandhate/ArmoredWarfareAPI@release.git`` in order to install
+the latest stable version of library from github.
 
 Maybe there will be a PyPI package later.
 
