@@ -38,17 +38,14 @@ class UserNotFoundException(BaseAWStatsException):
 
 class BattalionNotFound(BaseAWStatsException):
     """Raises whenever battalion with given id was not found"""
-    pass
 
 
 class UserHasClosedStatisticsException(BaseAWStatsException):
     """Raises when requested user has closed stats"""
-    pass
 
 
 class NotAuthException(BaseAWStatsException):
-    """Raises if bot did not pass auth"""
-    pass
+    """Raises if credentials did not pass auth"""
 
 
 class BadHTTPStatusCode(BaseAWStatsException):
