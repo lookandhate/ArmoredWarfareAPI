@@ -37,7 +37,8 @@ from .exceptions import UserHasClosedStatisticsException, UserNotFoundException,
 class API:
     def __init__(self, raw_cookie: Union[Dict, List] = None):
         """
-        :param raw_cookie: dict containing exported with "EditThisCookie" Chrome extension cookie from aw.mail.ru
+        :param raw_cookie :class:`Union[Dict, List]`
+         containing exported with "EditThisCookie" Chrome extension cookie from aw.mail.ru
         """
 
         # Paragraph that shows if we are not authenticated on site
@@ -95,7 +96,7 @@ class API:
         if request.status_code == 200:
             page = request.content.decode('utf-8')
             return page
-        raise BadHTTPStatusCode(f'Got non 200 status code: {request.status_code}', request.status_code)
+        raise BadHTTPStatusCode(f'Got non 200 status code: {request.status_code}')
 
     def __get_player_statistic_page(self, nickname: str, mode: int, data: int, tank_id: id, day: int = 0,
                                     ajax: int = 0) -> str:
@@ -154,21 +155,21 @@ class API:
         if len(battalion) == 0:
             battalion = None
 
-        battle_stats = str(page_parser.find("div", {"class": "total"}))
-        battle_stats = self.__clean_html(battle_stats).split()[-1].replace('сыграно', '')
-        battle_stats = int(battle_stats) if battle_stats else 0
+        battles_played = str(page_parser.find("div", {"class": "total"}))
+        battles_played = self.__clean_html(battles_played).split()[-1].replace('сыграно', '')
+        battles_played = int(battles_played) if battles_played else 0
 
-        avg_dmg = page_parser.findAll("div", {"class": "list_pad"})
-        clear = self.__clean_html(str(avg_dmg[3]))
-        avg_dmg = clear.split('\n')
-        avg_dmg = avg_dmg[4]
-        avg_dmg = avg_dmg.strip()[3::]
+        average_damage = page_parser.findAll("div", {"class": "list_pad"})
+        clean_html = self.__clean_html(str(average_damage[3]))
+        average_damage = clean_html.split('\n')
+        average_damage = average_damage[4]
+        average_damage = average_damage.strip()[3::]
 
         winrate_stat = str(page_parser.find("span", {"class": "yellow"}))
         winrate_stat = self.__clean_html(winrate_stat)
 
-        return {'winrate': float(winrate_stat[:-1]), 'battles': battle_stats,
-                'damage': float(avg_dmg), 'clantag': battalion, 'nickname': nickname}
+        return {'winrate': float(winrate_stat[:-1]), 'battles': battles_played,
+                'damage': float(average_damage), 'clantag': battalion, 'nickname': nickname}
 
     def __parse_battalion_page_for_nicknames(self, page: str) -> List:
         soup = BeautifulSoup(page, 'html.parser')
