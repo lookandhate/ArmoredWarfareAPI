@@ -10,7 +10,7 @@ else:
 client = API(cookies)
 
 test_data = {
-    'battalion_players_0': [{'id': 622893703, 'nickname': 'iLuvSasha'}]
+    'battalion_players_348473': [{'id': 622893703, 'nickname': 'iLuvSasha'}]
 }
 
 
@@ -58,3 +58,7 @@ def test_glops():
     assert player_data['clantag'] is None
     assert player_data['nickname'] == 'IterasuGr1njo'
 
+
+def test_battalion():
+    data = client.get_battalion_players(348473)
+    assert data == test_data['battalion_players_348473']
