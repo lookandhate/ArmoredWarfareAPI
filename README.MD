@@ -2,6 +2,8 @@
 
 ### An Armored Warfare API wrapper for python
 
+[Версия](https://github.com/lookandhate/ArmoredWarfareAPI/wiki/README.md-RU) для русскоязычных пользователей
+
 ## Requirements
 
 `requests` Python package for handling API requests
@@ -52,7 +54,7 @@ print(
 aw_stats.get_statistic_by_nickname(nickname='MyNickname', mode=mode_id)
 ``` 
 
-where ``mode_id`` is integer indicates id of gamemode(it's 0 for PvP, 1 for PvE, 2 for LoW(lords of war - old game mode
+where ``mode_id`` is integer indicates id of game mode(it's 0 for PvP, 1 for PvE, 2 for LoW(lords of war - old game mode
 that was ripped off), 3 for GLoPS and 4 for Ranked Battles)
 
 So if you want to get your PvE stats just pass ``mode=1`` in function like this
