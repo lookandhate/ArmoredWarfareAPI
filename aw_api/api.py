@@ -96,7 +96,7 @@ class API:
         if request.status_code == 200:
             page = request.content.decode('utf-8')
             return page
-        raise BadHTTPStatusCode(f'Got non 200 status code: {request.status_code}')
+        raise BadHTTPStatusCode(f'Got non 200 status code: {request.status_code}', status_code=request.status_code)
 
     def __get_player_statistic_page(self, nickname: str, mode: int, data: int, tank_id: id, day: int = 0,
                                     ajax: int = 0) -> str:
