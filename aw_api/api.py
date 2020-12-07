@@ -165,10 +165,10 @@ class API:
         average_damage = average_damage[4]
         average_damage = average_damage.strip()[3::]
 
-        winrate_stat = str(page_parser.find("span", {"class": "yellow"}))
-        winrate_stat = self.__clean_html(winrate_stat)
+        winrate = str(page_parser.find("span", {"class": "yellow"}))
+        winrate = self.__clean_html(winrate)
 
-        return {'winrate': float(winrate_stat[:-1]), 'battles': battles_played,
+        return {'winrate': float(winrate[:-1]), 'battles': battles_played,
                 'damage': float(average_damage), 'clantag': battalion, 'nickname': nickname}
 
     def __parse_battalion_page_for_nicknames(self, page: str) -> List:
@@ -191,7 +191,6 @@ class API:
         battalion_players = []
 
         # YE I KNOW THIS IS HORRIBLE AS FUCK
-        #
         for item in str(data[0]).split('\n'):
             if item.startswith('<div><a href="/user/stats'):
                 _, player_id, nickname, __ =\
@@ -215,7 +214,7 @@ class API:
         battalion_players = self.__parse_battalion_page_for_nicknames(page)
         return battalion_players
 
-    def get_statistic_by_nickname(self, nickname, mode=0, data=0, tank_id=0, day=0):
+    def get_statistic_by_nickname(self, nickname, mode=0, data=0, tank_id=0, day=0) -> dict:
         """
         Retrieves player statistics in mode on specified tank by given nickname or playerID
 
