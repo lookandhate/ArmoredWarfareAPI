@@ -142,11 +142,11 @@ class API:
 
         # Check if user exists( if user does not exist, then notifications[0] will be equal to PLAYER_NOT_EXISTS )
         if self.__PLAYER_NOT_EXISTS == str(notifications[0]):
-            raise UserNotFoundException('User with given nickname was not found')
+            raise UserNotFoundException(f'User {nickname} nickname was not found', nickname=nickname)
 
         # Check did user closed stats
         if '<div class="node_notice warn border">Пользователь закрыл доступ!</div>' == str(notifications[0]):
-            raise UserHasClosedStatisticsException('User with given nickname closed his stats')
+            raise UserHasClosedStatisticsException(f'{nickname} closed his stats', nickname=nickname)
 
         nickname = self.__clean_html(str(page_parser.find("div", {"class": "name"}))).split('\n')[1]
         battalion = page_parser.find('div', {'class': 'clan'})
@@ -224,7 +224,12 @@ class API:
         :param tank_id: staticID of tank to find for(0 means overall stat for mode)
         :param day: Filter stats by some date/battle count
 
-        :return: :dict: Dictionary contains player statistics
+        :return: :dict: Dictionary contains player statistics contains following fields
+            winrate: float - Player win rate in percents
+            battles: int - Total player battles
+            damage: float - Player average damage
+            clantag: Optional[str] - player battalion tag (can be None)
+            nickname: str - Correct player nickname
         """
 
         # Get page
