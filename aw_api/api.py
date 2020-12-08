@@ -23,15 +23,17 @@ SOFTWARE.
 
 """
 
-
 import re
 import requests
+import logging
 
 from typing import Union, Dict, List
 from bs4 import BeautifulSoup
 
 from .exceptions import UserHasClosedStatisticsException, UserNotFoundException, BadHTTPStatusCode, NotAuthException, \
     BattalionNotFound
+
+logger = logging.getLogger(__name__)
 
 
 class API:
@@ -91,11 +93,13 @@ class API:
 
         :return: :class:`str` That contains decoded HTML page
         """
+        logger.info('Performing request to {0}'.format(url))
 
         request = self.__session.get(url, cookies=self.__cookie)
         if request.status_code == 200:
             page = request.content.decode('utf-8')
             return page
+        logger.error('Got non 200 status code on request to {0}. Status code: {1}'.format(url, request.status_code))
         raise BadHTTPStatusCode(f'Got non 200 status code: {request.status_code}', status_code=request.status_code)
 
     def __get_player_statistic_page(self, nickname: str, mode: int, data: int, tank_id: id, day: int = 0,
@@ -138,14 +142,17 @@ class API:
 
         # Check if we authenticated (if not, then notifications[0] will be equal to one of items in NOT_AUTH_CHECK )
         if str(notifications[0]) in self.__NOT_AUTH_CHECK:
+            logger.error('Error on parsing page: Client is not authenticated')
             raise NotAuthException('I am not authenticated on aw.mail.ru')
 
         # Check if user exists( if user does not exist, then notifications[0] will be equal to PLAYER_NOT_EXISTS )
         if self.__PLAYER_NOT_EXISTS == str(notifications[0]):
+            logger.warning('Player {} was not found'.format(nickname))
             raise UserNotFoundException(f'User {nickname} nickname was not found', nickname=nickname)
 
         # Check did user closed stats
         if '<div class="node_notice warn border">Пользователь закрыл доступ!</div>' == str(notifications[0]):
+            logger.warning('Player {} has closed his statistics'.format(nickname))
             raise UserHasClosedStatisticsException(f'{nickname} closed his stats', nickname=nickname)
 
         nickname = self.__clean_html(str(page_parser.find("div", {"class": "name"}))).split('\n')[1]
@@ -174,6 +181,7 @@ class API:
     def __parse_battalion_page_for_nicknames(self, page: str) -> List:
         soup = BeautifulSoup(page, 'html.parser')
         if page == r'{"redirect":"\/alliance\/top"}':
+            logger.warning('Battalion with given ID was not found')
             raise BattalionNotFound("Battalion with given ID was not found")
 
         notifications = list(soup.find_all('p'))
@@ -183,6 +191,7 @@ class API:
 
         # Check if we authenticated (if not, then notifications[1] will be equal to __NOT_AUTH_CHECK_BATTALION )
         if self.__NOT_AUTH_CHECK_BATTALION == str(notifications[1]):
+            logger.error('Error on parsing page: Client is not authenticated')
             raise NotAuthException('I am not authenticated on aw.mail.ru')
 
         # Get all divs with cont class( Cont class is class for player information)
@@ -193,9 +202,9 @@ class API:
         # YE I KNOW THIS IS HORRIBLE AS FUCK
         for item in str(data[0]).split('\n'):
             if item.startswith('<div><a href="/user/stats'):
-                _, player_id, nickname, __ =\
+                _, player_id, nickname, __ = \
                     item.replace('<div><a href="/user/stats?', '').replace('">', ' ').replace('</a><br/', ' ') \
-                    .replace('data=', ' ').split(' ')
+                        .replace('data=', ' ').split(' ')
 
                 player = {'id': int(player_id), 'nickname': nickname}
                 battalion_players.append(player)
