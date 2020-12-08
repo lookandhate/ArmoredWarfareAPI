@@ -103,7 +103,7 @@ class API:
         raise BadHTTPStatusCode(f'Got non 200 status code: {request.status_code}', status_code=request.status_code)
 
     def __get_player_statistic_page(self, nickname: str, mode: int, data: int, tank_id: id, day: int = 0,
-                                    ajax: int = 0) -> str:
+                                    ajax: int = 0, maintype: int = 0) -> str:
         """
         :param nickname: Nickname of user to find.
         :param mode: Game mode Number from 0 to 4 {pvp, pve, low, glops, ranked}.
@@ -111,12 +111,13 @@ class API:
         :param tank_id: staticID of tank to find for(0 means overall stat for mode).
         :param day: Filter stats by some date/battle count.
         :param ajax: Is data should be returned like in ajax request (DONT CHANGE IT OR WILL BROKE).
+        :param maintype: In-game type of vehicle(0 all types, 1 - MBT, 2 - LT, 3 - TD, 4 - AFV)
 
         :return: string with decoded HTML page
 
         """
 
-        url = f'{self.__user_stats_url}&name={nickname}&mode={mode}&data={data}&type={tank_id}&day={day}&ajax={ajax}'
+        url = f'{self.__user_stats_url}&name={nickname}&mode={mode}&data={data}&type={tank_id}&maintype={maintype}&day={day}&ajax={ajax}'
         page = self.__get_page(url)
         return page
 
