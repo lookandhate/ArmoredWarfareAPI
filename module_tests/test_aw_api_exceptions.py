@@ -4,7 +4,7 @@ import pytest
 import json
 
 from aw_api import API
-from aw_api.exceptions import NotAuthException, UserNotFoundException,\
+from aw_api.exceptions import NotAuthException, UserNotFoundException, \
     UserHasClosedStatisticsException, BattalionNotFound
 
 if os.getenv('HOME'):
@@ -22,6 +22,10 @@ bad_credentials_client = API(bad_cookies)
 def test_player_not_found_exception():
     with pytest.raises(UserNotFoundException):
         authenticated_client.get_statistic_by_nickname('1')
+    try:
+        authenticated_client.get_statistic_by_nickname('1')
+    except UserNotFoundException as exc:
+        assert exc.nickname == '1'
 
 
 def test_battalion_does_not_exist():
@@ -32,6 +36,10 @@ def test_battalion_does_not_exist():
 def test_statistics_is_closed():
     with pytest.raises(UserHasClosedStatisticsException):
         authenticated_client.get_statistic_by_nickname('Tuka_Chinchilla')
+    try:
+        authenticated_client.get_statistic_by_nickname('Tuka_Chinchilla')
+    except UserHasClosedStatisticsException as exc:
+        assert exc.nickname == 'Tuka_Chinchilla'
 
 
 def test_not_auth_player_statistics():

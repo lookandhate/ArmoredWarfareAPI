@@ -31,9 +31,9 @@ class BaseAWStatsException(Exception):
 class UserNotFoundException(BaseAWStatsException):
     """Raises whenever user with given nickname was not found"""
 
-    def __init__(self, nickname, *args, **kwargs):
+    def __init__(self, message, nickname=None):
+        super().__init__(message)
         self.nickname = nickname
-        super().__init__(*args, **kwargs)
 
 
 class BattalionNotFound(BaseAWStatsException):
@@ -43,12 +43,16 @@ class BattalionNotFound(BaseAWStatsException):
 class UserHasClosedStatisticsException(BaseAWStatsException):
     """Raises when requested user has closed stats"""
 
+    def __init__(self, message, nickname=None):
+        super().__init__(message)
+        self.nickname = nickname
+
 
 class NotAuthException(BaseAWStatsException):
     """Raises if credentials did not pass auth"""
 
 
 class BadHTTPStatusCode(BaseAWStatsException):
-    def __init__(self, status_code, *args, **kwargs):
-        super().__init__(*args, **kwargs)
+    def __init__(self, message, status_code):
+        super().__init__(message)
         self.status_code = status_code
