@@ -174,19 +174,21 @@ class API:
         average_damage = __parsed_data[4]
         average_damage = average_damage.strip()[3::]
 
-        overall_spotting_damage = float(__parsed_data[6].split()[2].replace('разведданным', ''))
+        overall_spotting_damage = __parsed_data[6].split()[2].replace('разведданным', '')
+        overall_spotting_damage = float(overall_spotting_damage) if overall_spotting_damage else 0.0
 
         __kills_info = page_parser.find('div', {'id': 'profile_main_cont'}).find('div', {'class': 'game_stats2'})
         __average_kills_info = __kills_info.find('div', {'class': 'list_pad'}).find_all('div')
         __clean_average_kills_info = self.__clean_html(str(__average_kills_info[2]))
-        average_kills = float(__clean_average_kills_info.split()[-1][3::])
+        average_kills = __clean_average_kills_info.split()[-1][3::]
+        average_kills = float(average_kills) if average_kills else 0.0
 
         winrate = str(page_parser.find("span", {"class": "yellow"}))
         winrate = self.__clean_html(winrate)
 
         return {'winrate': float(winrate[:-1]), 'battles': battles_played,
                 'damage': float(average_damage), 'clantag': battalion,
-                'average_spotting': overall_spotting_damage / battles_played,
+                'average_spotting': overall_spotting_damage / battles_played if battles_played else 0.0,
                 'average_kills': average_kills,
                 'nickname': nickname}
 
