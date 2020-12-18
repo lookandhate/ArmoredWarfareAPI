@@ -79,7 +79,7 @@ Code Above will print your GLoPS statistics on XM1A3
 4) In case if something went wrong (Player was not found, player have his stats closed, etc, an Exception will be raised)
 Example:
 ```python
-   player_not_found =  aw_stats.get_statistic_by_nickname(nickname='1')
+player_not_found =  aw_stats.get_statistic_by_nickname(nickname='1')
 ```
 Will raise ``aw_api.exceptions.UserNotFoundException`` Exception
 

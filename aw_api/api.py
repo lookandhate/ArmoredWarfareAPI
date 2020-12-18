@@ -167,17 +167,30 @@ class API:
         battles_played = self.__clean_html(battles_played).split()[-1].replace('сыграно', '')
         battles_played = int(battles_played) if battles_played else 0
 
-        average_damage = page_parser.findAll("div", {"class": "list_pad"})
-        clean_html = self.__clean_html(str(average_damage[3]))
-        average_damage = clean_html.split('\n')
-        average_damage = average_damage[4]
+        __average_damage_data = page_parser.findAll("div", {"class": "list_pad"})
+        __clean_html = self.__clean_html(str(__average_damage_data[3]))
+        __parsed_data = __clean_html.split('\n')
+
+        average_damage = __parsed_data[4]
         average_damage = average_damage.strip()[3::]
+
+        overall_spotting_damage = __parsed_data[6].split()[2].replace('разведданным', '')
+        overall_spotting_damage = float(overall_spotting_damage) if overall_spotting_damage else 0.0
+
+        __kills_info = page_parser.find('div', {'id': 'profile_main_cont'}).find('div', {'class': 'game_stats2'})
+        __average_kills_info = __kills_info.find('div', {'class': 'list_pad'}).find_all('div')
+        __clean_average_kills_info = self.__clean_html(str(__average_kills_info[2]))
+        average_kills = __clean_average_kills_info.split()[-1][3::]
+        average_kills = float(average_kills) if average_kills else 0.0
 
         winrate = str(page_parser.find("span", {"class": "yellow"}))
         winrate = self.__clean_html(winrate)
 
         return {'winrate': float(winrate[:-1]), 'battles': battles_played,
-                'damage': float(average_damage), 'clantag': battalion, 'nickname': nickname}
+                'damage': float(average_damage), 'clantag': battalion,
+                'average_spotting': overall_spotting_damage / battles_played if battles_played else 0.0,
+                'average_kills': average_kills,
+                'nickname': nickname}
 
     def __parse_battalion_page_for_nicknames(self, page: str) -> List:
         soup = BeautifulSoup(page, 'html.parser')
