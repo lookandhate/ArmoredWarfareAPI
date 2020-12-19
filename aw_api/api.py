@@ -206,7 +206,7 @@ class API:
             data = list(levels_data.find('div', {'class': 'diag_pad'}).children)
             data: List[Tag] = [item for item in data if item != '\n']
             levels = self.__extract_battles_per_level(data)
-            average_level = self._calculate_average_level(levels) / battles_played
+            average_level = self._calculate_average_level(levels) / battles_played if battles_played else None
         else:
             average_level = None
 
