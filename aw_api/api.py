@@ -28,7 +28,7 @@ import requests
 import logging
 
 from typing import Union, Dict, List
-from bs4 import BeautifulSoup
+from bs4 import BeautifulSoup, Tag
 
 from .exceptions import UserHasClosedStatisticsException, UserNotFoundException, BadHTTPStatusCode, NotAuthException, \
     BattalionNotFound
@@ -73,6 +73,21 @@ class API:
         cleanr = re.compile('<.*?>')
         cleantext = re.sub(cleanr, '', raw_html)
         return cleantext
+
+    @classmethod
+    def __extract_battles_per_level(cls, level_stats: List[Tag]) -> List[int]:
+        battles = []
+        for item in level_stats:
+            children = list(item.children)
+            battles.append(int(cls.__clean_html(str(children[-2]))))
+        return battles
+
+    @staticmethod
+    def _calculate_average_level(level_stats: List[int]) -> int:
+        total_sum = 0
+        for index, item in enumerate(level_stats, 1):
+            total_sum += index * item
+        return total_sum
 
     @staticmethod
     def __prepare_cookie(raw_cookie: Union[Dict, List]) -> Dict:
@@ -186,10 +201,20 @@ class API:
         winrate = str(page_parser.find("span", {"class": "yellow"}))
         winrate = self.__clean_html(winrate)
 
+        levels_data = page_parser.find('div', {'class': 'game_stats3'})
+        if levels_data:
+            data = list(levels_data.find('div', {'class': 'diag_pad'}).children)
+            data: List[Tag] = [item for item in data if item != '\n']
+            levels = self.__extract_battles_per_level(data)
+            average_level = self._calculate_average_level(levels) / battles_played
+        else:
+            average_level = None
+
         return {'winrate': float(winrate[:-1]), 'battles': battles_played,
                 'damage': float(average_damage), 'clantag': battalion,
                 'average_spotting': overall_spotting_damage / battles_played if battles_played else 0.0,
                 'average_kills': average_kills,
+                'average_level': average_level,
                 'nickname': nickname}
 
     def __parse_battalion_page_for_nicknames(self, page: str) -> List:
