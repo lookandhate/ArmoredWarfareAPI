@@ -286,5 +286,19 @@ class API:
         parsed_data = self.__get_player_statistics(page, nickname)
         return parsed_data
 
+    def search_battalion(self, battalion_name):
+        import json
+
+        r = self.__session.post(f'https://armata.my.games/dynamic/gamecenter/?a=clan_search',
+                                data={'name': battalion_name})
+
+        if r.status_code == 200:
+            content = json.loads(r.content.decode('utf-8'))
+            if content['error'] == 0:
+                response_data = content['data']
+                return response_data
+            raise Exception(f'Bad battalion search code')
+        raise BadHTTPStatusCode(f'Received not 200 status code', r.status_code)
+
 
 AW = API
