@@ -6,14 +6,14 @@ with open('requirements.txt') as f:
 
 setup(
     name='aw_api',
-    version='0.5.1',
+    version='0.5.2',
     packages=['aw_api'],
     description='Armored Warfare unofficial API',
     url='https://github.com/lookandhate/ArmoredWarfareAPI',
     license='MIT',
     author='https://github.com/lookandhate',
     author_email='',
-    install_requires=requirements,
+    install_requires=['requests', 'beautifulsoup4'],
     python_requires='>=3.6.0',
     keywords=['armored warfare', 'aw', 'armored warfare api', 'armata', 'армата'],
     classifiers=[
