@@ -52,4 +52,4 @@ jobs:
       - name: Test with pytest
 
         run: |
-          pytest module_tests
+          pytest module_tests/
