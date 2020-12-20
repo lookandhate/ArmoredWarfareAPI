@@ -27,13 +27,36 @@ import re
 import requests
 import logging
 
-from typing import Union, Dict, List
+from typing import Union, Dict, List, NamedTuple, Optional
 from bs4 import BeautifulSoup, Tag
 
 from .exceptions import UserHasClosedStatisticsException, UserNotFoundException, BadHTTPStatusCode, NotAuthException, \
     BattalionNotFound
 
 logger = logging.getLogger(__name__)
+
+
+class PlayerStatistics(NamedTuple):
+    winrate: float
+    battles: int
+    damage: float
+    clantag: Optional[str]
+    average_spotting: float
+    average_kills: float
+    average_level: Optional[float]
+    nickname: str
+
+    def __getitem__(self, item):
+        if isinstance(item, str):
+            return getattr(self, item)
+        return NamedTuple.__getitem__(self, item)
+        # return super().__getitem__(item)
+
+    def get(self, item, default=None):
+        try:
+            return self[item]
+        except (KeyError, AttributeError):
+            return default
 
 
 class API:
@@ -136,7 +159,7 @@ class API:
         page = self.__get_page(url)
         return page
 
-    def __get_player_statistics(self, page: str, nickname=None) -> Dict:
+    def __get_player_statistics(self, page: str, nickname=None) -> PlayerStatistics:
         """
         :param page: string with HTML document
 
@@ -210,12 +233,12 @@ class API:
         else:
             average_level = None
 
-        return {'winrate': float(winrate[:-1]), 'battles': battles_played,
-                'damage': float(average_damage), 'clantag': battalion,
-                'average_spotting': overall_spotting_damage / battles_played if battles_played else 0.0,
-                'average_kills': average_kills,
-                'average_level': average_level,
-                'nickname': nickname}
+        return PlayerStatistics(**{'winrate': float(winrate[:-1]), 'battles': battles_played,
+                                   'damage': float(average_damage), 'clantag': battalion,
+                                   'average_spotting': overall_spotting_damage / battles_played if battles_played else 0.0,
+                                   'average_kills': average_kills,
+                                   'average_level': average_level,
+                                   'nickname': nickname})
 
     def __parse_battalion_page_for_nicknames(self, page: str) -> List:
         soup = BeautifulSoup(page, 'html.parser')
@@ -262,7 +285,7 @@ class API:
         battalion_players = self.__parse_battalion_page_for_nicknames(page)
         return battalion_players
 
-    def get_statistic_by_nickname(self, nickname, mode=0, data=0, tank_id=0, day=0) -> dict:
+    def get_statistic_by_nickname(self, nickname, mode=0, data=0, tank_id=0, day=0) -> PlayerStatistics:
         """
         Retrieves player statistics in mode on specified tank by given nickname or playerID
 

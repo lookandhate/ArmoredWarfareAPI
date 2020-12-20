@@ -1,12 +1,10 @@
 from setuptools import setup
 
 requirements = []
-with open('requirements.txt') as f:
-    requirements = f.read().splitlines()
 
 setup(
     name='aw_api',
-    version='0.5.2',
+    version='1.0.0',
     packages=['aw_api'],
     description='Armored Warfare unofficial API',
     url='https://github.com/lookandhate/ArmoredWarfareAPI',
