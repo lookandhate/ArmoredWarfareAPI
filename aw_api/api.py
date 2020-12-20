@@ -27,8 +27,8 @@ import re
 import requests
 import logging
 
-from typing import Union, Dict, List, NamedTuple, Optional
-from collections import namedtuple
+from typing import Union, Dict, List, Optional
+from dataclasses import dataclass
 from bs4 import BeautifulSoup, Tag
 
 from .exceptions import UserHasClosedStatisticsException, UserNotFoundException, BadHTTPStatusCode, NotAuthException, \
@@ -36,13 +36,9 @@ from .exceptions import UserHasClosedStatisticsException, UserNotFoundException,
 
 logger = logging.getLogger(__name__)
 
-__PlayerStatistics__ = namedtuple('PlayerStatistics',
-                                  ['winrate', 'battles', 'damage', 'clantag', 'average_spotting', 'average_kills',
-                                   'average_level', 'nickname'])
 
-
-class PlayerStatistics(NamedTuple):
-    import sys
+@dataclass
+class PlayerStatistics:
     winrate: float
     battles: int
     damage: float
@@ -51,22 +47,9 @@ class PlayerStatistics(NamedTuple):
     average_kills: float
     average_level: Optional[float]
     nickname: str
-    if sys.version_info >= (3, 8, 0):
-        def __getitem__(self, item):
-            if isinstance(item, str):
-                return getattr(self, item)
-            return NamedTuple.__getitem__(self, item)
-    else:
-        def __getitem__(self, item):
-            if isinstance(item, str):
-                return getattr(self, item)
-            return self._asdict()[item]
 
-    def get(self, item, default=None):
-        try:
-            return self[item]
-        except (KeyError, AttributeError):
-            return default
+    def __getitem__(self, item):
+        return getattr(self, item)
 
 
 class API:
