@@ -40,6 +40,36 @@ class BattalionNotFound(BaseAWStatsException):
     """Raises whenever battalion with given id was not found"""
 
 
+class BattalionSearchException(BaseAWStatsException):
+    """
+    Base exception for battalion search exceptions
+    versionadded: 1.1
+    """
+
+
+class BattalionSearchTooShortQuery(BattalionSearchException):
+    """
+    Raises whenever API could not find battalion because of to short query string
+    versionadded:: 1.1
+    """
+
+    def __init__(self, message, length_of_request):
+        super().__init__(message)
+        self.length = length_of_request
+
+
+class BattalionSearchBattalionNotFound(BattalionSearchException):
+    """
+    Raises whenever battalion with given name was not found
+    versionadded:: 1.1
+
+    """
+
+    def __init__(self, message, battalion_name):
+        super().__init__(message)
+        self.battalion_name = battalion_name
+
+
 class UserHasClosedStatisticsException(BaseAWStatsException):
     """Raises when requested user has closed stats"""
 
