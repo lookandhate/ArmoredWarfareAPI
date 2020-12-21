@@ -62,6 +62,11 @@ my_pve_statistics = aw_stats.get_statistic_by_nickname(nickname='MyNickname', mo
 print("I've played {0} battles in PvE, won {1} battles of 100 and deal {2} damage in average".format(
     my_pve_statistics['battles'], my_pve_statistics['winrate'], my_pve_statistics['damage']))
 ```
+2.1) You can also use attribute notation: 
+```python
+my_pve_statistics['battles'] == my_pve_statistics.battles # Internally __getitem__ method overloaded
+# so my_pve_statistics['battles'] will invoke getattr(my_pve_statistics, 'battles') method that retrieves value stored in battles variable
+```
 
 3) You can specify the tank too: just pass ``tank_id`` key-word parameter.
 ```python
