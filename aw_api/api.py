@@ -298,7 +298,7 @@ class API:
         parsed_data = self.__get_player_statistics(page, nickname)
         return parsed_data
 
-    def search_battalion(self, battalion_name):
+    def search_battalion(self, battalion_name) -> Dict[int, str]:
         """
         Searches for battalion by given name
         :raises BattalionSearchTooShortQuery if you gave less than 4 symbols for search
@@ -315,14 +315,14 @@ class API:
                                 data={'name': battalion_name})
 
         if r.status_code == 200:
-            content = json.loads(r.content.decode('utf-8'))
-            if content['error'] == 0:
-                response_data = content['data']
-                return response_data
-            if content['error'] == 1:
-                raise BattalionSearchTooShortQuery(f'Given battalion name is too short for process. 4 symbols required, {len(battalion_name)} were given')
-            if content['error'] == 2:
-                raise BattalionNotFound(f'Battalion with name "{battalion_name}" was not found.')
+            __dirty_content = json.loads(r.content.decode('utf-8'))
+            if __dirty_content['error'] == 0:
+                transformed_data = {int(key): __dirty_content['data'][key] for key in __dirty_content['data'].keys()}
+                return transformed_data
+            if __dirty_content['error'] == 1:
+                raise BattalionSearchTooShortQuery(f'Given battalion name is too short for process. 4 symbols required, {len(battalion_name)} were given', len(battalion_name))
+            if __dirty_content['error'] == 2:
+                raise BattalionSearchBattalionNotFound(f'Battalion with name "{battalion_name}" was not found.')
 
         raise BadHTTPStatusCode(f'Received not 200 status code', r.status_code)
 
