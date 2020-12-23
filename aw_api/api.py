@@ -308,7 +308,7 @@ class API:
 
         :param nickname: Nickname of user to find
         :param mode: Game mode Number from 0 to 4 {pvp, pve, low, glops, ranked}
-        :param data: CSA ID of player to find(overwrites user nickname) if not 0
+        :param data: CSA ID of player to find(overwrites user nickname if not 0)
         :param tank_id: staticID of tank to find for(0 means overall stat for mode)
         :param day: Filter stats by some date/battle count
 
