@@ -1,6 +1,6 @@
 # AW_API
 
-### An Armored Warfare API wrapper for python
+### Unofficial Armored Warfare API
 
 [Версия](https://github.com/lookandhate/ArmoredWarfareAPI/wiki/README.md-RU) для русскоязычных пользователей
 
@@ -31,61 +31,19 @@ the latest stable version of library from PyPI.
 
 [cookie.json]: https://github.com/lookandhate/ArmoredWarfareAPI/blob/master/github_readmepage/cookies.json_example.png 
 
+### Quick example
 ```python
-from aw_api.api import AW, API # API is just an alias for AW class
+import json
+from aw_api import API
 
-__cookies = dict()  # Your cookies
-aw_stats = AW(__cookies)
+aw_api_client = API(raw_cookie=json.loads(open('cookies.json').read()))
 
-my_stats = aw_stats.get_statistic_by_nickname(nickname='MyNickname')
+my_pvp_statistics = aw_api_client.get_statistic_by_nickname('MyNickname')
+
 print(
-    'My winrate: {0}\nMy average damage: {1}\nI have played {2} battles'.format(my_stats['winrate'], my_stats['damage'],
-                                                                                my_stats['battles']))
-
-
+    f'My nickname is {my_pvp_statistics.nickname}, I have played {my_pvp_statistics.battles} in PvP and have '
+    f'{my_pvp_statistics.winrate} percents of wins. In average I deal {my_pvp_statistics.damage} per battle and kill {my_pvp_statistics.average_kills} enemies.'
+    f'My teammates do {my_pvp_statistics.average_spotting} damage on tanks spotted by me. '
+)
 
 ```
-
-2) You can specify the game mode from which you want to get statistics by changing ``mode`` keyword.
-
-```python
-aw_stats.get_statistic_by_nickname(nickname='MyNickname', mode=mode_id)
-``` 
-
-where ``mode_id`` is integer indicates id of game mode(it's 0 for PvP, 1 for PvE, 2 for LoW(lords of war - old game mode
-that was ripped off), 3 for GLoPS and 4 for Ranked Battles)
-
-So if you want to get your PvE stats just pass ``mode=1`` in function like this
-
-```python
-my_pve_statistics = aw_stats.get_statistic_by_nickname(nickname='MyNickname', mode=1)
-print("I've played {0} battles in PvE, won {1} battles of 100 and deal {2} damage in average".format(
-    my_pve_statistics['battles'], my_pve_statistics['winrate'], my_pve_statistics['damage']))
-```
-2.1) You can also use attribute notation: 
-```python
-my_pve_statistics['battles'] == my_pve_statistics.battles # Internally __getitem__ method overloaded
-# so my_pve_statistics['battles'] will invoke getattr(my_pve_statistics, 'battles') method that retrieves value stored in battles variable
-```
-
-3) You can specify the tank too: just pass ``tank_id`` key-word parameter.
-```python
-my_glops_statistics = aw_stats.get_statistic_by_nickname(nickname='MyNickname', mode=3, tank_id=157)
-print("I've played {0} battles in PvE on XM1A3, won {1} battles of 100 and deal {2} damage in average".format(
-    my_glops_statistics['battles'], my_glops_statistics['winrate'], my_glops_statistics['damage']))
-```
-Code Above will print your GLoPS statistics on XM1A3
-
-*I can't provide IDs for all tanks in the game for now, but you can dig them in Game.log or from source code of statistic page at armata.my.games*
-
-
-4) In case if something went wrong (Player was not found, player have his stats closed, etc, an Exception will be raised)
-Example:
-```python
-player_not_found =  aw_stats.get_statistic_by_nickname(nickname='1')
-```
-Will raise ``aw_api.exceptions.UserNotFoundException`` Exception
-
-List of all possible exceptions:`` UserHasClosedStatisticsException, UserNotFoundException, BadHTTPStatusCode, NotAuthException, BattalionNotFound``.
-
-And BaseAWStatsException base of all exceptions above
