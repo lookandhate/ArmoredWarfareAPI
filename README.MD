@@ -47,3 +47,5 @@ print(
 )
 
 ```
+
+More detailed information about methods, and their arguments can be found on [wiki](https://github.com/lookandhate/ArmoredWarfareAPI/wiki)
