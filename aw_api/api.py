@@ -55,7 +55,7 @@ class PlayerStatistics:
 class API:
     def __init__(self, raw_cookie: Optional[List[Dict]] = None):
         """
-        :param raw_cookie :class:`Union[Dict, List]`
+        :param raw_cookie :class:`Optional[Dict, List]`
          containing exported with "EditThisCookie" Chrome extension cookie from aw.mail.ru
         """
 
@@ -83,7 +83,6 @@ class API:
         if raw_cookie:
             self.__cookie = self.__prepare_cookie(raw_cookie)
 
-        print(self.__session.headers)
 
     # Clean HTML from tags to extract only data
     @staticmethod
