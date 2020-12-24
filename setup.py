@@ -4,7 +4,7 @@ requirements = []
 
 setup(
     name='aw_api',
-    version='1.1.0a',
+    version='1.1.0',
     packages=['aw_api'],
     description='Armored Warfare unofficial API',
     url='https://github.com/lookandhate/ArmoredWarfareAPI',
