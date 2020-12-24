@@ -27,19 +27,35 @@ import re
 import requests
 import logging
 
-from typing import Union, Dict, List
+from typing import Union, Dict, List, Optional
+from dataclasses import dataclass
 from bs4 import BeautifulSoup, Tag
 
 from .exceptions import UserHasClosedStatisticsException, UserNotFoundException, BadHTTPStatusCode, NotAuthException, \
-    BattalionNotFound
+    BattalionNotFound, BattalionSearchTooShortQuery, BattalionSearchBattalionNotFound
 
 logger = logging.getLogger(__name__)
 
 
+@dataclass
+class PlayerStatistics:
+    winrate: float
+    battles: int
+    damage: float
+    clantag: Optional[str]
+    average_spotting: float
+    average_kills: float
+    average_level: Optional[float]
+    nickname: str
+
+    def __getitem__(self, item):
+        return getattr(self, item)
+
+
 class API:
-    def __init__(self, raw_cookie: Union[Dict, List] = None):
+    def __init__(self, raw_cookie: Optional[List[Dict]] = None):
         """
-        :param raw_cookie :class:`Union[Dict, List]`
+        :param raw_cookie :class:`Optional[Dict, List]`
          containing exported with "EditThisCookie" Chrome extension cookie from aw.mail.ru
         """
 
@@ -83,7 +99,7 @@ class API:
         return battles
 
     @staticmethod
-    def _calculate_average_level(level_stats: List[int]) -> int:
+    def __calculate_level_sum(level_stats: List[int]) -> int:
         total_sum = 0
         for index, item in enumerate(level_stats, 1):
             total_sum += index * item
@@ -117,7 +133,7 @@ class API:
         logger.error('Got non 200 status code on request to {0}. Status code: {1}'.format(url, request.status_code))
         raise BadHTTPStatusCode(f'Got non 200 status code: {request.status_code}', status_code=request.status_code)
 
-    def __get_player_statistic_page(self, nickname: str, mode: int, data: int, tank_id: id, day: int = 0,
+    def __get_player_statistic_page(self, nickname: str, mode: int, data: int, tank_id: int, day: int = 0,
                                     ajax: int = 0, maintype: int = 0) -> str:
         """
         :param nickname: Nickname of user to find.
@@ -136,20 +152,17 @@ class API:
         page = self.__get_page(url)
         return page
 
-    def __get_player_statistics(self, page: str, nickname=None) -> Dict:
+    def __get_player_statistics(self, page: str, nickname=None) -> PlayerStatistics:
         """
         :param page: string with HTML document
 
-        :return: dict with user data, where
-        winrate: float - Player win rate in percents
-        battles: int - Total player battles
-        damage: float - Player average damage
-        clantag: Optional[str] - player battalion tag (can be None)
-        nickname: str - Correct player nickname
+        :return: PlayerStatistics instance
         """
 
         # Let's parse the page
         page_parser = BeautifulSoup(page, "html.parser")
+
+        # Get page "notifications" and look for error messages
         notifications = list(page_parser.find_all('p'))
 
         if not notifications:
@@ -171,6 +184,7 @@ class API:
             logger.warning('Player {} has closed his statistics'.format(nickname))
             raise UserHasClosedStatisticsException(f'{nickname} closed his stats', nickname=nickname)
 
+        # There is no errors, so go ahead and parse page for information
         nickname = self.__clean_html(str(page_parser.find("div", {"class": "name"}))).split('\n')[1]
         battalion = page_parser.find('div', {'class': 'clan'})
         battalion = str(battalion.contents[3]).split()
@@ -178,9 +192,9 @@ class API:
         if len(battalion) == 0:
             battalion = None
 
-        battles_played = str(page_parser.find("div", {"class": "total"}))
-        battles_played = self.__clean_html(battles_played).split()[-1].replace('сыграно', '')
-        battles_played = int(battles_played) if battles_played else 0
+        __battles_played_dirty = str(page_parser.find("div", {"class": "total"}))
+        __battles_played_dirty = self.__clean_html(__battles_played_dirty).split()[-1].replace('сыграно', '')
+        battles_played: int = int(__battles_played_dirty) if __battles_played_dirty else 0
 
         __average_damage_data = page_parser.findAll("div", {"class": "list_pad"})
         __clean_html = self.__clean_html(str(__average_damage_data[3]))
@@ -192,9 +206,9 @@ class API:
         overall_spotting_damage = __parsed_data[6].split()[2].replace('разведданным', '')
         overall_spotting_damage = float(overall_spotting_damage) if overall_spotting_damage else 0.0
 
-        __kills_info = page_parser.find('div', {'id': 'profile_main_cont'}).find('div', {'class': 'game_stats2'})
-        __average_kills_info = __kills_info.find('div', {'class': 'list_pad'}).find_all('div')
-        __clean_average_kills_info = self.__clean_html(str(__average_kills_info[2]))
+        __kills_info_dirty = page_parser.find('div', {'id': 'profile_main_cont'}).find('div', {'class': 'game_stats2'})
+        __average_kills_info_dirty = __kills_info_dirty.find('div', {'class': 'list_pad'}).find_all('div')
+        __clean_average_kills_info = self.__clean_html(str(__average_kills_info_dirty[2]))
         average_kills = __clean_average_kills_info.split()[-1][3::]
         average_kills = float(average_kills) if average_kills else 0.0
 
@@ -203,26 +217,36 @@ class API:
 
         levels_data = page_parser.find('div', {'class': 'game_stats3'})
         if levels_data:
-            data = list(levels_data.find('div', {'class': 'diag_pad'}).children)
-            data: List[Tag] = [item for item in data if item != '\n']
-            levels = self.__extract_battles_per_level(data)
-            average_level = self._calculate_average_level(levels) / battles_played if battles_played else None
+            __level_data_dirty = list(levels_data.find('div', {'class': 'diag_pad'}).children)
+            __levels_data_dirty_tags: List[Tag] = [item for item in __level_data_dirty if item != '\n']
+            levels = self.__extract_battles_per_level(__levels_data_dirty_tags)
+            average_level = self.__calculate_level_sum(levels) / battles_played if battles_played else None
         else:
             average_level = None
 
-        return {'winrate': float(winrate[:-1]), 'battles': battles_played,
-                'damage': float(average_damage), 'clantag': battalion,
-                'average_spotting': overall_spotting_damage / battles_played if battles_played else 0.0,
-                'average_kills': average_kills,
-                'average_level': average_level,
-                'nickname': nickname}
+        return PlayerStatistics(**{'winrate': float(winrate[:-1]), 'battles': battles_played,
+                                   'damage': float(average_damage), 'clantag': battalion,
+                                   'average_spotting': overall_spotting_damage / battles_played if battles_played else 0.0,
+                                   'average_kills': average_kills,
+                                   'average_level': average_level,
+                                   'nickname': nickname})
 
-    def __parse_battalion_page_for_nicknames(self, page: str) -> List:
+    def __parse_battalion_page_for_nicknames(self, page: str) -> List[Dict]:
+        """
+        This is fucking hell, get outta here if you dont want to burn your eyes
+        I warned you
+        :param page:
+        :return:
+        """
         soup = BeautifulSoup(page, 'html.parser')
+
+        # So, if battalion with given id does not exist
+        # then instead of HTML page we will receive JSON, telling browser to redirect on battalion rating page
         if page == r'{"redirect":"\/alliance\/top"}':
             logger.warning('Battalion with given ID was not found')
             raise BattalionNotFound("Battalion with given ID was not found")
 
+        # Get page "notifications" and look for error messages
         notifications = list(soup.find_all('p'))
         if not notifications:
             notifications = soup.find_all('div')
@@ -239,15 +263,28 @@ class API:
         battalion_players = []
 
         # YE I KNOW THIS IS HORRIBLE AS FUCK
+        # SO, in here we are iterating over sub-tags in <div class='cont'>
         for item in str(data[0]).split('\n'):
+            # Item will be something like this:
+            # <div><a href="/user/stats?data=458829630">T57Heavy-Tank</a><br/><span>Рядовой</span></div>
+            # if item is a player line
             if item.startswith('<div><a href="/user/stats'):
+                # Here we are getting rid of all HTML stuff like tags, hrefs, etc by replacing them with space-symbols
+                # We will get something like this:
+                # 485633946 RUBIN ><span>Командир</span></div>
+
+                # Imagine making  a list from that
+                # Then we will have something like this: ['', '485633946', 'RUBIN', '><span>Командир</span></div>']
+                # Only thing we need from that is ID and nickname, so lets extract them below
                 _, player_id, nickname, __ = \
                     item.replace('<div><a href="/user/stats?', '').replace('">', ' ').replace('</a><br/', ' ') \
                         .replace('data=', ' ').split(' ')
 
+                # Create a dictionary with player ID and player nickname and add this to List of all players
                 player = {'id': int(player_id), 'nickname': nickname}
                 battalion_players.append(player)
 
+        # Eventually, return all battalion players
         return battalion_players
 
     def get_battalion_players(self, battalion_id: int) -> List:
@@ -262,22 +299,19 @@ class API:
         battalion_players = self.__parse_battalion_page_for_nicknames(page)
         return battalion_players
 
-    def get_statistic_by_nickname(self, nickname, mode=0, data=0, tank_id=0, day=0) -> dict:
+    def get_statistic_by_nickname(self, nickname, mode=0, data=0, tank_id=0, day=0) -> PlayerStatistics:
         """
         Retrieves player statistics in mode on specified tank by given nickname or playerID
 
+        :raises :exc:`UserHasClosedStatisticsException`, :exc:`NotAuthException`,:exc:`UserNotFoundException`
+
         :param nickname: Nickname of user to find
         :param mode: Game mode Number from 0 to 4 {pvp, pve, low, glops, ranked}
-        :param data: CSA ID of player to find(overwrites user nickname) if not 0
+        :param data: CSA ID of player to find(overwrites user nickname if not 0)
         :param tank_id: staticID of tank to find for(0 means overall stat for mode)
         :param day: Filter stats by some date/battle count
 
-        :return: :dict: Dictionary contains player statistics contains following fields
-            winrate: float - Player win rate in percents
-            battles: int - Total player battles
-            damage: float - Player average damage
-            clantag: Optional[str] - player battalion tag (can be None)
-            nickname: str - Correct player nickname
+        :return: :class:`PlayerStatistics`
         """
 
         # Get page
@@ -286,18 +320,39 @@ class API:
         parsed_data = self.__get_player_statistics(page, nickname)
         return parsed_data
 
-    def search_battalion(self, battalion_name):
+    def search_battalion(self, battalion_name) -> Dict[int, str]:
+        """
+        Searches for battalion by given name
+
+        :raises :exc:`BattalionSearchTooShortQuery` if you gave less than 4 symbols for search
+
+        :raises :exc:`BattalionSearchBattalionNotFound` if battalion with given name was not found
+
+        versionadded:: 1.1
+
+        :param battalion_name:
+        :return: :class:`Dict[int, str]`
+         containing battalion ID and corresponding battalion name
+        """
         import json
 
         r = self.__session.post(f'https://armata.my.games/dynamic/gamecenter/?a=clan_search',
                                 data={'name': battalion_name})
 
         if r.status_code == 200:
-            content = json.loads(r.content.decode('utf-8'))
-            if content['error'] == 0:
-                response_data = content['data']
-                return response_data
-            raise Exception(f'Bad battalion search code')
+            __dirty_content = json.loads(r.content.decode('utf-8'))
+            if __dirty_content['error'] == 0:
+                transformed_data = {int(key): __dirty_content['data'][key] for key in __dirty_content['data'].keys()}
+                return transformed_data
+            if __dirty_content['error'] == 1:
+                raise BattalionSearchTooShortQuery(
+                    f'Given battalion name is too short for process.'
+                    f' 4 symbols required, {len(battalion_name)} were given',
+                    len(battalion_name))
+            if __dirty_content['error'] == 2:
+                raise BattalionSearchBattalionNotFound(f'Battalion with name "{battalion_name}"'
+                                                       f' was not found.', battalion_name)
+
         raise BadHTTPStatusCode(f'Received not 200 status code', r.status_code)
 
 
