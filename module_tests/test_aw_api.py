@@ -108,8 +108,3 @@ class TestLookForBattalion:
         multiple_battalions_search_results = client.search_battalion('RAGE')
         assert multiple_battalions_search_results == TestLookForBattalion.multiple_battalion_search_test_data
 
-
-def disabled_test_battalion():  # This test has been disabled because battalion with id = 348473 does not exist anymore
-    data = client.get_battalion_players(348473)
-    assert data == test_data['battalion_players_348473']
-
