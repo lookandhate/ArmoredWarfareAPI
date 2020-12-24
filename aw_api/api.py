@@ -83,7 +83,6 @@ class API:
         if raw_cookie:
             self.__cookie = self.__prepare_cookie(raw_cookie)
 
-
     # Clean HTML from tags to extract only data
     @staticmethod
     def __clean_html(raw_html):
@@ -347,7 +346,8 @@ class API:
                 return transformed_data
             if __dirty_content['error'] == 1:
                 raise BattalionSearchTooShortQuery(
-                    f'Given battalion name is too short for process. 4 symbols required, {len(battalion_name)} were given',
+                    f'Given battalion name is too short for process.'
+                    f' 4 symbols required, {len(battalion_name)} were given',
                     len(battalion_name))
             if __dirty_content['error'] == 2:
                 raise BattalionSearchBattalionNotFound(f'Battalion with name "{battalion_name}"'
