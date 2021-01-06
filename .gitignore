@@ -141,5 +141,5 @@ cython_debug/
 .idea
 /tests/
 cookies.json
-test_module.py
+1test_module.py
 fake_cookies.json
