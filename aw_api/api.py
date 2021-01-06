@@ -43,6 +43,7 @@ class PlayerStatistics:
     battles: int
     damage: float
     clantag: Optional[str]
+    battalion_full: Optional[str]
     average_spotting: float
     average_kills: float
     average_level: Optional[float]
@@ -186,11 +187,15 @@ class API:
 
         # There is no errors, so go ahead and parse page for information
         nickname = self.__clean_html(str(page_parser.find("div", {"class": "name"}))).split('\n')[1]
-        battalion = page_parser.find('div', {'class': 'clan'})
-        battalion = str(battalion.contents[3]).split()
-        battalion = battalion[0].replace('<span>', '').replace('[', '').replace(']', '')
-        if len(battalion) == 0:
-            battalion = None
+        __battalion_info_dirty = page_parser.find('div', {'class': 'clan'})
+        __battalion_tag_and_fullname_dirty = str(__battalion_info_dirty.contents[3]).split()
+        battalion_tag = __battalion_tag_and_fullname_dirty[0].replace('<span>', '').replace('[', '').replace(']', '')
+        battalion_full_name = __battalion_tag_and_fullname_dirty[1].replace('</span>', '').replace('[', '').replace(']', '')
+
+
+        if len(battalion_tag) == 0:
+            battalion_tag = None
+            battalion_full_name = None
 
         __battles_played_dirty = str(page_parser.find("div", {"class": "total"}))
         __battles_played_dirty = self.__clean_html(__battles_played_dirty).split()[-1].replace('сыграно', '')
@@ -225,13 +230,14 @@ class API:
             average_level = None
 
         return PlayerStatistics(**{'winrate': float(winrate[:-1]), 'battles': battles_played,
-                                   'damage': float(average_damage), 'clantag': battalion,
+                                   'damage': float(average_damage), 'clantag': battalion_tag, 'battalion_full': battalion_full_name,
                                    'average_spotting': overall_spotting_damage / battles_played if battles_played else 0.0,
                                    'average_kills': average_kills,
                                    'average_level': average_level,
                                    'nickname': nickname})
 
     def __parse_battalion_page_for_nicknames(self, page: str) -> List[Dict]:
+        # TODO Complete doc-string
         """
         This is fucking hell, get outta here if you dont want to burn your eyes
         I warned you
