@@ -28,6 +28,7 @@ import requests
 import logging
 
 from typing import Union, Dict, List, Optional
+from enum import Enum
 from dataclasses import dataclass
 from bs4 import BeautifulSoup, Tag
 
@@ -35,6 +36,15 @@ from .exceptions import UserHasClosedStatisticsException, UserNotFoundException,
     BattalionNotFound, BattalionSearchTooShortQuery, BattalionSearchBattalionNotFound
 
 logger = logging.getLogger(__name__)
+
+
+class GameMode(Enum):
+    PVP = 0
+    PVE = 1
+    LOW = 2
+    GLOPS = 3
+    RANKED = 4
+    RB = RANKED
 
 
 @dataclass
@@ -190,8 +200,8 @@ class API:
         __battalion_info_dirty = page_parser.find('div', {'class': 'clan'})
         __battalion_tag_and_fullname_dirty = str(__battalion_info_dirty.contents[3]).split()
         battalion_tag = __battalion_tag_and_fullname_dirty[0].replace('<span>', '').replace('[', '').replace(']', '')
-        battalion_full_name = __battalion_tag_and_fullname_dirty[1].replace('</span>', '').replace('[', '').replace(']', '')
-
+        battalion_full_name = __battalion_tag_and_fullname_dirty[1].replace('</span>', '').replace('[', '').replace(']',
+                                                                                                                    '')
 
         if len(battalion_tag) == 0:
             battalion_tag = None
@@ -230,7 +240,8 @@ class API:
             average_level = None
 
         return PlayerStatistics(**{'winrate': float(winrate[:-1]), 'battles': battles_played,
-                                   'damage': float(average_damage), 'clantag': battalion_tag, 'battalion_full': battalion_full_name,
+                                   'damage': float(average_damage), 'clantag': battalion_tag,
+                                   'battalion_full': battalion_full_name,
                                    'average_spotting': overall_spotting_damage / battles_played if battles_played else 0.0,
                                    'average_kills': average_kills,
                                    'average_level': average_level,
@@ -305,7 +316,8 @@ class API:
         battalion_players = self.__parse_battalion_page_for_nicknames(page)
         return battalion_players
 
-    def get_statistic_by_nickname(self, nickname, mode=0, data=0, tank_id=0, day=0) -> PlayerStatistics:
+    def get_statistic_by_nickname(self, nickname, mode: Union[int, GameMode] = 0, data: int = 0, tank_id: int = 0,
+                                  day: int = 0) -> PlayerStatistics:
         """
         Retrieves player statistics in mode on specified tank by given nickname or playerID
 
@@ -320,13 +332,17 @@ class API:
         :return: :class:`PlayerStatistics`
         """
 
+        # If GameMode instance was passed as a mode, than assign number from GameMode.value to mode variable
+        if isinstance(mode, GameMode):
+            mode = mode.value
+
         # Get page
         page = self.__get_player_statistic_page(nickname, mode, data, tank_id, day)
         # Parse the page
         parsed_data = self.__get_player_statistics(page, nickname)
         return parsed_data
 
-    def search_battalion(self, battalion_name) -> Dict[int, str]:
+    def search_battalion(self, battalion_name: str) -> Dict[int, str]:
         """
         Searches for battalion by given name
 
