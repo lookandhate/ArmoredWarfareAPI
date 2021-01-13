@@ -1,6 +1,7 @@
 # AW_API
 
 ### Unofficial Armored Warfare API
+![Python package](https://github.com/lookandhate/ArmoredWarfareAPI/workflows/Python%20package/badge.svg?branch=release)
 
 [Версия](https://github.com/lookandhate/ArmoredWarfareAPI/wiki/README.md-RU) для русскоязычных пользователей
 
