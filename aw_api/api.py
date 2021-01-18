@@ -155,7 +155,7 @@ class API:
         """
         :param page: string with HTML document
 
-        :return: PlayerStatistics instance
+        :return: `PlayerStatistics` instance
         """
 
         # Let's parse the page
@@ -341,8 +341,9 @@ class API:
         versionadded:: 1.1
 
         :param battalion_name:
-        :return: :class:`Dict[int, str]`
-         containing battalion ID and corresponding battalion name
+        :return: :class:`List[BattalionSearchResultEntry]`
+        List of BattalionSearchResultEntry dataclass instances
+
         """
         import json
 
@@ -369,8 +370,6 @@ class API:
                                                        f' was not found.', battalion_name)
 
         raise BadHTTPStatusCode(f'Received not 200 status code', r.status_code)
-
-
 
 
 AW = API
