@@ -12,6 +12,6 @@ Parser simulating API for ArmoredWarfare players statistics.
 from .api import API, AW
 from .api import GameMode
 from .player import Player
-from .battalion import BattalionMemberEntry, BattalionSearchResult
+from .battalion import BattalionMemberEntry, BattalionSearchResultEntry
 
 import aw_api.exceptions
