@@ -1,6 +1,8 @@
 import json
 import os
+
 from aw_api import API
+from aw_api import BattalionSearchResultEntry
 
 # TODO: Coverage 95%+ of main API module
 if os.getenv('HOME'):
@@ -97,14 +99,18 @@ class TestTankAndGameModes:
 
 
 class TestLookForBattalion:
-    multiple_battalion_search_test_data = {167635: 'RAGE TEAM', 275033: 'RAGE AGAINST THE MACHINE#1', 287761: '161 rus',
-                                           292883: 'Rage Against The Mashine', 293774: 'RageWolves',
-                                           302260: 'RAGE_Team'}  # Search by RAGE word
+    predefined_data = [
+        BattalionSearchResultEntry('RAGE TEAM', 167635),
+        BattalionSearchResultEntry('RAGE AGAINST THE MACHINE#1', 275033),
+        BattalionSearchResultEntry('161 rus', 287761),
+        BattalionSearchResultEntry('Rage Against The Mashine', 292883),
+        BattalionSearchResultEntry('RageWolves', 293774),
+        BattalionSearchResultEntry('RAGE_Team', 302260),
+    ]
 
     def test_battalion_search(self):
         search_results = client.search_battalion('LABS')
-        assert search_results[335779] == 'ArmoredLabs'
+        assert search_results[0].full_name == 'ArmoredLabs'
 
         multiple_battalions_search_results = client.search_battalion('RAGE')
-        assert multiple_battalions_search_results == TestLookForBattalion.multiple_battalion_search_test_data
-
+        assert multiple_battalions_search_results == TestLookForBattalion.predefined_data

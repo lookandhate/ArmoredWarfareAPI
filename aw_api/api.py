@@ -1,7 +1,7 @@
 """
 MIT License
 
-Copyright (c) 2020 lookandhate
+Copyright (c) 2020-2021 Dmitriy Trofimov
 
 Permission is hereby granted, free of charge, to any person obtaining a copy
 of this software and associated documentation files (the "Software"), to deal
@@ -29,11 +29,14 @@ import logging
 
 from typing import Union, Dict, List, Optional
 from enum import Enum
-from dataclasses import dataclass
 from bs4 import BeautifulSoup, Tag
 
 from .exceptions import UserHasClosedStatisticsException, UserNotFoundException, BadHTTPStatusCode, NotAuthException, \
     BattalionNotFound, BattalionSearchTooShortQuery, BattalionSearchBattalionNotFound
+
+from .player import PlayerStatistics
+
+from .battalion import BattalionMemberEntry, BattalionSearchResultEntry
 
 logger = logging.getLogger(__name__)
 
@@ -45,22 +48,6 @@ class GameMode(Enum):
     GLOPS = 3
     RANKED = 4
     RB = RANKED
-
-
-@dataclass
-class PlayerStatistics:
-    winrate: float
-    battles: int
-    damage: float
-    clantag: Optional[str]
-    battalion_full: Optional[str]
-    average_spotting: float
-    average_kills: float
-    average_level: Optional[float]
-    nickname: str
-
-    def __getitem__(self, item):
-        return getattr(self, item)
 
 
 class API:
@@ -167,7 +154,7 @@ class API:
         """
         :param page: string with HTML document
 
-        :return: PlayerStatistics instance
+        :return: `PlayerStatistics` instance
         """
 
         # Let's parse the page
@@ -293,18 +280,21 @@ class API:
                 # Imagine making  a list from that
                 # Then we will have something like this: ['', '485633946', 'RUBIN', '><span>Командир</span></div>']
                 # Only thing we need from that is ID and nickname, so lets extract them below
-                _, player_id, nickname, __ = \
+                _, player_id, nickname, battalion_role = \
                     item.replace('<div><a href="/user/stats?', '').replace('">', ' ').replace('</a><br/', ' ') \
                         .replace('data=', ' ').split(' ')
 
+                # Clean tags in battalion_role
+                battalion_role = battalion_role.replace('><span>', '').replace('</span></div>', '')
+
                 # Create a dictionary with player ID and player nickname and add this to List of all players
-                player = {'id': int(player_id), 'nickname': nickname}
+                player = {'id': int(player_id), 'nickname': nickname, 'role': battalion_role}
                 battalion_players.append(player)
 
         # Eventually, return all battalion players
         return battalion_players
 
-    def get_battalion_players(self, battalion_id: int) -> List:
+    def get_battalion_players(self, battalion_id: int) -> List[BattalionMemberEntry]:
         """
         Retrieves battalion players by given battalion ID
 
@@ -312,8 +302,20 @@ class API:
         :return: list of players in this battalion
         """
 
+        # TODO: Optimize that algorithm, so we would need to iterate over list two times here and in page parser method
+
         page = self.__get_page(f'{self.__battalion_stats_url}&data={battalion_id}')
-        battalion_players = self.__parse_battalion_page_for_nicknames(page)
+        __temp_battalion_players = self.__parse_battalion_page_for_nicknames(page)
+
+        battalion_players: List[BattalionMemberEntry] = []
+        for internal_dict_entry in __temp_battalion_players:
+            battalion_players.append(
+                BattalionMemberEntry(nickname=internal_dict_entry['nickname'],
+                                     id=internal_dict_entry['id'],
+                                     role=internal_dict_entry['role'],
+                                     battalion_id=battalion_id)
+            )
+
         return battalion_players
 
     def get_statistic_by_nickname(self, nickname, mode: Union[int, GameMode] = 0, data: int = 0, tank_id: int = 0,
@@ -342,7 +344,7 @@ class API:
         parsed_data = self.__get_player_statistics(page, nickname)
         return parsed_data
 
-    def search_battalion(self, battalion_name: str) -> Dict[int, str]:
+    def search_battalion(self, battalion_name: str) -> List[BattalionSearchResultEntry]:
         """
         Searches for battalion by given name
 
@@ -353,8 +355,9 @@ class API:
         versionadded:: 1.1
 
         :param battalion_name:
-        :return: :class:`Dict[int, str]`
-         containing battalion ID and corresponding battalion name
+        :return: :class:`List[BattalionSearchResultEntry]`
+        List of BattalionSearchResultEntry dataclass instances
+
         """
         import json
 
@@ -364,8 +367,13 @@ class API:
         if r.status_code == 200:
             __dirty_content = json.loads(r.content.decode('utf-8'))
             if __dirty_content['error'] == 0:
-                transformed_data = {int(key): __dirty_content['data'][key] for key in __dirty_content['data'].keys()}
-                return transformed_data
+                __battalions_search_result_data = __dirty_content['data']
+
+                search_result = []
+                for key in __battalions_search_result_data.keys():
+                    search_result.append(BattalionSearchResultEntry(__battalions_search_result_data[key], int(key)))
+                return search_result
+
             if __dirty_content['error'] == 1:
                 raise BattalionSearchTooShortQuery(
                     f'Given battalion name is too short for process.'

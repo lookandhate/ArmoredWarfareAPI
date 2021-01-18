@@ -1,3 +1,4 @@
+"""
 MIT License
 
 Copyright (c) 2020-2021 Dmitriy Trofimov
@@ -19,3 +20,25 @@ AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
 LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
 OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 SOFTWARE.
+
+"""
+from dataclasses import dataclass
+from typing import Optional
+
+
+@dataclass
+class PlayerStatistics:
+    winrate: float
+    battles: int
+    damage: float
+    clantag: Optional[str]
+    battalion_full: Optional[str]
+    average_spotting: float
+    average_kills: float
+    average_level: Optional[float]
+    nickname: str
+
+    def __getitem__(self, item):
+        return getattr(self, item)
+
+Player = PlayerStatistics
