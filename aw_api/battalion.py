@@ -42,3 +42,6 @@ class BattalionSearchResultEntry:
 
     def __repr__(self):
         return f'<Battalion "{self.full_name}" with ID {self.id}>'
+
+    def __eq__(self, other):
+        return isinstance(other, self.__class__) and self.id == other.id and self.full_name == other.full_name
