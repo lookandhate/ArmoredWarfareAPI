@@ -330,7 +330,7 @@ class API:
         parsed_data = self.__get_player_statistics(page, nickname)
         return parsed_data
 
-    def search_battalion(self, battalion_name: str) -> Dict[int, str]:
+    def search_battalion(self, battalion_name: str) -> List[BattalionSearchResult]:
         """
         Searches for battalion by given name
 
@@ -352,8 +352,13 @@ class API:
         if r.status_code == 200:
             __dirty_content = json.loads(r.content.decode('utf-8'))
             if __dirty_content['error'] == 0:
-                transformed_data = {int(key): __dirty_content['data'][key] for key in __dirty_content['data'].keys()}
-                return transformed_data
+                __battalions_search_result_data = __dirty_content['data']
+
+                search_result = []
+                for key in __battalions_search_result_data.keys():
+                    search_result.append(BattalionSearchResult(__battalions_search_result_data[key], int(key)))
+                return search_result
+
             if __dirty_content['error'] == 1:
                 raise BattalionSearchTooShortQuery(
                     f'Given battalion name is too short for process.'
@@ -364,6 +369,8 @@ class API:
                                                        f' was not found.', battalion_name)
 
         raise BadHTTPStatusCode(f'Received not 200 status code', r.status_code)
+
+
 
 
 AW = API
