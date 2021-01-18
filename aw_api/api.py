@@ -36,6 +36,9 @@ from .exceptions import UserHasClosedStatisticsException, UserNotFoundException,
 
 from .player import PlayerStatistics
 
+from .battalion import BattalionMemberEntry, BattalionSearchResult
+
+
 logger = logging.getLogger(__name__)
 
 
