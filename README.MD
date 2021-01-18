@@ -2,6 +2,7 @@
 
 ### Unofficial Armored Warfare API
 ![Python package](https://github.com/lookandhate/ArmoredWarfareAPI/workflows/Python%20package/badge.svg?branch=release)
+[![Downloads](https://static.pepy.tech/personalized-badge/aw-api?period=total&units=international_system&left_color=blue&right_color=black&left_text=Downloads)](https://pepy.tech/project/aw-api)
 
 [Версия](https://github.com/lookandhate/ArmoredWarfareAPI/wiki/README.md-RU) для русскоязычных пользователей
 
