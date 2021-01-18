@@ -36,7 +36,7 @@ from .exceptions import UserHasClosedStatisticsException, UserNotFoundException,
 
 from .player import PlayerStatistics
 
-from .battalion import BattalionMemberEntry, BattalionSearchResult
+from .battalion import BattalionMemberEntry, BattalionSearchResultEntry
 
 
 logger = logging.getLogger(__name__)
@@ -330,7 +330,7 @@ class API:
         parsed_data = self.__get_player_statistics(page, nickname)
         return parsed_data
 
-    def search_battalion(self, battalion_name: str) -> List[BattalionSearchResult]:
+    def search_battalion(self, battalion_name: str) -> List[BattalionSearchResultEntry]:
         """
         Searches for battalion by given name
 
@@ -356,7 +356,7 @@ class API:
 
                 search_result = []
                 for key in __battalions_search_result_data.keys():
-                    search_result.append(BattalionSearchResult(__battalions_search_result_data[key], int(key)))
+                    search_result.append(BattalionSearchResultEntry(__battalions_search_result_data[key], int(key)))
                 return search_result
 
             if __dirty_content['error'] == 1:

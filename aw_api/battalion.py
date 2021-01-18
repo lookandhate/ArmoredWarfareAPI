@@ -36,6 +36,9 @@ class BattalionMemberEntry:
 
 
 @dataclass
-class BattalionSearchResult:
+class BattalionSearchResultEntry:
     full_name: str
     id: int
+
+    def __repr__(self):
+        return f'<Battalion "{self.full_name}" with ID {self.id}>'
