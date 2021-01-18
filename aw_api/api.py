@@ -1,7 +1,7 @@
 """
 MIT License
 
-Copyright (c) 2020 lookandhate
+Copyright (c) 2020-2021 Dmitriy Trofimov
 
 Permission is hereby granted, free of charge, to any person obtaining a copy
 of this software and associated documentation files (the "Software"), to deal
@@ -29,11 +29,12 @@ import logging
 
 from typing import Union, Dict, List, Optional
 from enum import Enum
-from dataclasses import dataclass
 from bs4 import BeautifulSoup, Tag
 
 from .exceptions import UserHasClosedStatisticsException, UserNotFoundException, BadHTTPStatusCode, NotAuthException, \
     BattalionNotFound, BattalionSearchTooShortQuery, BattalionSearchBattalionNotFound
+
+from .player import PlayerStatistics
 
 logger = logging.getLogger(__name__)
 
@@ -45,22 +46,6 @@ class GameMode(Enum):
     GLOPS = 3
     RANKED = 4
     RB = RANKED
-
-
-@dataclass
-class PlayerStatistics:
-    winrate: float
-    battles: int
-    damage: float
-    clantag: Optional[str]
-    battalion_full: Optional[str]
-    average_spotting: float
-    average_kills: float
-    average_level: Optional[float]
-    nickname: str
-
-    def __getitem__(self, item):
-        return getattr(self, item)
 
 
 class API:
