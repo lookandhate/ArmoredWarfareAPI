@@ -4,7 +4,7 @@ Armored Warfare API Wrapper
 
 Parser simulating API for ArmoredWarfare players statistics.
 
-:copyright: (c) 2020 lookandhate
+:copyright: (c) 2020-2021 Dmitriy Trofimov
 :license: MIT, see LICENSE for more details.
 
 """
