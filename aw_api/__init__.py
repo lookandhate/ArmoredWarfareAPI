@@ -15,3 +15,6 @@ from .player import Player
 from .battalion import BattalionMemberEntry, BattalionSearchResultEntry
 
 import aw_api.exceptions
+
+
+__version__ = '1.4.0'
