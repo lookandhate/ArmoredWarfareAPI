@@ -38,7 +38,6 @@ from .player import PlayerStatistics
 
 from .battalion import BattalionMemberEntry, BattalionSearchResultEntry
 
-
 logger = logging.getLogger(__name__)
 
 
@@ -281,18 +280,21 @@ class API:
                 # Imagine making  a list from that
                 # Then we will have something like this: ['', '485633946', 'RUBIN', '><span>Командир</span></div>']
                 # Only thing we need from that is ID and nickname, so lets extract them below
-                _, player_id, nickname, __ = \
+                _, player_id, nickname, battalion_role = \
                     item.replace('<div><a href="/user/stats?', '').replace('">', ' ').replace('</a><br/', ' ') \
                         .replace('data=', ' ').split(' ')
 
+                # Clean tags in battalion_role
+                battalion_role = battalion_role.replace('><span>', '').replace('</span></div>', '')
+
                 # Create a dictionary with player ID and player nickname and add this to List of all players
-                player = {'id': int(player_id), 'nickname': nickname}
+                player = {'id': int(player_id), 'nickname': nickname, 'role': battalion_role}
                 battalion_players.append(player)
 
         # Eventually, return all battalion players
         return battalion_players
 
-    def get_battalion_players(self, battalion_id: int) -> List:
+    def get_battalion_players(self, battalion_id: int) -> List[BattalionMemberEntry]:
         """
         Retrieves battalion players by given battalion ID
 
@@ -300,8 +302,20 @@ class API:
         :return: list of players in this battalion
         """
 
+        # TODO: Optimize that algorithm, so we would need to iterate over list two times here and in page parser method
+
         page = self.__get_page(f'{self.__battalion_stats_url}&data={battalion_id}')
-        battalion_players = self.__parse_battalion_page_for_nicknames(page)
+        __temp_battalion_players = self.__parse_battalion_page_for_nicknames(page)
+
+        battalion_players: List[BattalionMemberEntry] = []
+        for internal_dict_entry in __temp_battalion_players:
+            battalion_players.append(
+                BattalionMemberEntry(nickname=internal_dict_entry['nickname'],
+                                     id=internal_dict_entry['id'],
+                                     role=internal_dict_entry['role'],
+                                     battalion_id=battalion_id)
+            )
+
         return battalion_players
 
     def get_statistic_by_nickname(self, nickname, mode: Union[int, GameMode] = 0, data: int = 0, tank_id: int = 0,

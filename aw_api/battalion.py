@@ -34,8 +34,11 @@ class BattalionMemberEntry:
     Dataclass for battalion member data. Each instance has 4 fields:
 
     nickname :class:`str` - Nickname of battalion member.
+
     id :class:`int` - Unique ID of player.
+
     role :class:`Optional[str]` - Role of player in the battalion.
+
     battalion_id :class:`int` - Unique ID of battalion, player belongs to.
 
     versionadded:: 1.3
@@ -47,6 +50,25 @@ class BattalionMemberEntry:
     role: Optional[str]
     battalion_id: int
 
+    def __eq__(self, other):
+        """
+        Comparing :class:`BattalionMemberEntry` to other objects
+
+        versionadded:: 1.3
+
+        :param other: Object we are comparing self with
+        :return: :class:`bool` True if other is instance of :class:`BattalionMemberEntry`
+        and objects have identical fields. Otherwise returns False
+
+        """
+        return isinstance(other, self.__class__) and \
+               self.id == other.id and \
+               self.role == other.role and \
+               self.battalion_id == other.battalion_id
+
+    def __repr__(self):
+        return f'<{self.nickname}(ID: {self.id}) is a member of battalion with ID {self.battalion_id}>'
+
 
 @dataclass
 class BattalionSearchResultEntry:
@@ -55,6 +77,7 @@ class BattalionSearchResultEntry:
     Dataclass for battalion search method of API. It contains two fields:
 
     full_name :class:`str` - full name of the battalion
+
     id :class:`int` - Unique ID of battalion
 
     versionadded:: 1.3
