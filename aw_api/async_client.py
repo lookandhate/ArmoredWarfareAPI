@@ -40,8 +40,10 @@ __all__ = ['AIOClient']
 class AIOClient:
     def __init__(self, raw_cookie: Optional[List[Dict]] = None):
         """
+
         :param raw_cookie :class:`Optional[Dict, List]`
-         containing exported with "EditThisCookie" Chrome extension cookie from aw.mail.ru
+        containing exported with "EditThisCookie" Chrome extension cookie from aw.mail.ru
+
         """
 
         # Base URL for player statistics
