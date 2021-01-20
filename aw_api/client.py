@@ -23,7 +23,6 @@ SOFTWARE.
 
 """
 
-import re
 import requests
 import logging
 import warnings
