@@ -318,7 +318,7 @@ class API:
 
         return battalion_players
 
-    def get_statistic_by_nickname(self, nickname, mode: Union[int, GameMode] = 0, data: int = 0, tank_id: int = 0,
+    def get_statistic_by_nickname(self, nickname, mode: Union[int, GameMode] = 0, player_id: int = 0, tank_id: int = 0,
                                   day: int = 0) -> PlayerStatistics:
         """
         Retrieves player statistics in mode on specified tank by given nickname or playerID
@@ -327,7 +327,7 @@ class API:
 
         :param nickname: Nickname of user to find
         :param mode: Game mode Number from 0 to 4 {pvp, pve, low, glops, ranked}
-        :param data: CSA ID of player to find(overwrites user nickname if not 0)
+        :param player_id: CSA ID of player to find(overwrites user nickname if not 0)
         :param tank_id: staticID of tank to find for(0 means overall stat for mode)
         :param day: Filter stats by some date/battle count
 
@@ -339,7 +339,7 @@ class API:
             mode = mode.value
 
         # Get page
-        page = self.__get_player_statistic_page(nickname, mode, data, tank_id, day)
+        page = self.__get_player_statistic_page(nickname, mode, player_id, tank_id, day)
         # Parse the page
         parsed_data = self.__get_player_statistics(page, nickname)
         return parsed_data
