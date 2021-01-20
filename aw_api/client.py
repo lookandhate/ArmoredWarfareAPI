@@ -26,26 +26,29 @@ SOFTWARE.
 import re
 import requests
 import logging
+import warnings
 
-from .exceptions import UserHasClosedStatisticsException, UserNotFoundException, BadHTTPStatusCode, NotAuthException, \
-    BattalionNotFound, BattalionSearchTooShortQuery, BattalionSearchBattalionNotFound
+from .exceptions import BadHTTPStatusCode, BattalionSearchTooShortQuery, BattalionSearchBattalionNotFound
 
 from .structs import PlayerStatistics, BattalionMemberEntry, BattalionSearchResultEntry
 from .parser import Parser
 from .enums import GameMode
 
 from typing import Union, Dict, List, Optional
-from bs4 import BeautifulSoup, Tag
 
 logger = logging.getLogger(__name__)
 
+__all__ = ['Client', 'API', 'AW']
 
-class API:
+
+class Client:
     def __init__(self, raw_cookie: Optional[List[Dict]] = None):
         """
         :param raw_cookie :class:`Optional[Dict, List]`
          containing exported with "EditThisCookie" Chrome extension cookie from aw.mail.ru
         """
+        warnings.warn('Synchronous client is deprecated and could be removed any time soon. Please Use AIOClient',
+                      DeprecationWarning)
 
         self.__parser: Parser = Parser()
 
@@ -201,4 +204,4 @@ class API:
         raise BadHTTPStatusCode(f'Received not 200 status code', r.status_code)
 
 
-AW = API
+AW = API = Client

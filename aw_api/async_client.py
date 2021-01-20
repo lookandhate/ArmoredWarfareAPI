@@ -9,6 +9,8 @@ from typing import Optional, Union, Dict, List
 
 logger = logging.getLogger()
 
+__all__ = ['AIOClient']
+
 
 class AIOClient:
     def __init__(self, raw_cookie: Optional[List[Dict]] = None):

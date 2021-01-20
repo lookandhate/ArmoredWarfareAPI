@@ -1,5 +1,6 @@
 from setuptools import setup
 from os import path
+from aw_api import __version__
 this_directory = path.abspath(path.dirname(__file__))
 
 with open(path.join(this_directory, 'README.md'), encoding='utf-8') as f:
@@ -9,7 +10,7 @@ requirements = []
 
 setup(
     name='aw_api',
-    version='1.4.0',
+    version=__version__,
     packages=['aw_api'],
     description='Armored Warfare unofficial API',
     long_description=long_description,
