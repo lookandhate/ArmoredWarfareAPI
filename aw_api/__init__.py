@@ -9,8 +9,9 @@ Parser simulating API for ArmoredWarfare players statistics.
 
 """
 
-from .api import API, AW
-from .api import GameMode
+from .client import API, AW
+from .enums import GameMode
+from .structs import *
 
 import aw_api.exceptions
 

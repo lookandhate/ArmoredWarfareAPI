@@ -1,5 +1,5 @@
-from structs.player import *
-from .api import GameMode
+from structs import *
+from .enums import GameMode
 from .parser import Parser
 
 import logging
@@ -100,5 +100,29 @@ class AIOClient:
         # Get page
         page = await self.__get_player_statistic_page(nickname, mode, player_id, tank_id, day)
         # Parse the page
-        parsed_data = self.__parser.get_player_statistics(page, nickname)
+        parsed_data = self.__parser.parse_player_statistics(page, nickname)
         return parsed_data
+
+    async def get_battalion_players(self, battalion_id: int) -> List[BattalionMemberEntry]:
+        """
+        Retrieves battalion players by given battalion ID
+
+        :param battalion_id: ID of battalion
+        :return: list of players in this battalion
+        """
+
+        # TODO: Optimize that algorithm, so we would need to iterate over list two times here and in page parser method
+
+        page = await self.__get_page(f'{self.__battalion_stats_url}&data={battalion_id}')
+        __temp_battalion_players = self.__parser.parse_battalion_players(page)
+
+        battalion_players: List[BattalionMemberEntry] = []
+        for internal_dict_entry in __temp_battalion_players:
+            battalion_players.append(
+                BattalionMemberEntry(nickname=internal_dict_entry['nickname'],
+                                     id=internal_dict_entry['id'],
+                                     role=internal_dict_entry['role'],
+                                     battalion_id=battalion_id)
+            )
+
+        return battalion_players

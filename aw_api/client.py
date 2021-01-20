@@ -109,66 +109,6 @@ class API:
         page = self.__get_page(url)
         return page
 
-    def __parse_battalion_page_for_nicknames(self, page: str) -> List[Dict]:
-        # TODO Complete doc-string
-        """
-        This is fucking hell, get outta here if you dont want to burn your eyes
-        I warned you
-        :param page:
-        :return:
-        """
-        soup = BeautifulSoup(page, 'html.parser')
-
-        # So, if battalion with given id does not exist
-        # then instead of HTML page we will receive JSON, telling browser to redirect on battalion rating page
-        if page == r'{"redirect":"\/alliance\/top"}':
-            logger.warning('Battalion with given ID was not found')
-            raise BattalionNotFound("Battalion with given ID was not found")
-
-        # Get page "notifications" and look for error messages
-        notifications = list(soup.find_all('p'))
-        if not notifications:
-            notifications = soup.find_all('div')
-        notifications = list(notifications)
-
-        # Check if we authenticated (if not, then notifications[1] will be equal to __NOT_AUTH_CHECK_BATTALION )
-        if self.__NOT_AUTH_CHECK_BATTALION == str(notifications[1]):
-            logger.error('Error on parsing page: Client is not authenticated')
-            raise NotAuthException('I am not authenticated on aw.mail.ru')
-
-        # Get all divs with cont class( Cont class is class for player information)
-        data = soup.find_all('div', {'class': 'cont'})
-        # This is the list where we gonna keep track of players
-        battalion_players = []
-
-        # YE I KNOW THIS IS HORRIBLE AS FUCK
-        # SO, in here we are iterating over sub-tags in <div class='cont'>
-        for item in str(data[0]).split('\n'):
-            # Item will be something like this:
-            # <div><a href="/user/stats?data=458829630">T57Heavy-Tank</a><br/><span>Рядовой</span></div>
-            # if item is a player line
-            if item.startswith('<div><a href="/user/stats'):
-                # Here we are getting rid of all HTML stuff like tags, hrefs, etc by replacing them with space-symbols
-                # We will get something like this:
-                # 485633946 RUBIN ><span>Командир</span></div>
-
-                # Imagine making  a list from that
-                # Then we will have something like this: ['', '485633946', 'RUBIN', '><span>Командир</span></div>']
-                # Only thing we need from that is ID and nickname, so lets extract them below
-                _, player_id, nickname, battalion_role = \
-                    item.replace('<div><a href="/user/stats?', '').replace('">', ' ').replace('</a><br/', ' ') \
-                        .replace('data=', ' ').split(' ')
-
-                # Clean tags in battalion_role
-                battalion_role = battalion_role.replace('><span>', '').replace('</span></div>', '')
-
-                # Create a dictionary with player ID and player nickname and add this to List of all players
-                player = {'id': int(player_id), 'nickname': nickname, 'role': battalion_role}
-                battalion_players.append(player)
-
-        # Eventually, return all battalion players
-        return battalion_players
-
     def get_battalion_players(self, battalion_id: int) -> List[BattalionMemberEntry]:
         """
         Retrieves battalion players by given battalion ID
@@ -180,7 +120,7 @@ class API:
         # TODO: Optimize that algorithm, so we would need to iterate over list two times here and in page parser method
 
         page = self.__get_page(f'{self.__battalion_stats_url}&data={battalion_id}')
-        __temp_battalion_players = self.__parse_battalion_page_for_nicknames(page)
+        __temp_battalion_players = self.__parser.parse_battalion_players(page)
 
         battalion_players: List[BattalionMemberEntry] = []
         for internal_dict_entry in __temp_battalion_players:
@@ -216,7 +156,7 @@ class API:
         # Get page
         page = self.__get_player_statistic_page(nickname, mode, player_id, tank_id, day)
         # Parse the page
-        parsed_data = self.__parser.get_player_statistics(page, nickname)
+        parsed_data = self.__parser.parse_player_statistics(page, nickname)
         return parsed_data
 
     def search_battalion(self, battalion_name: str) -> List[BattalionSearchResultEntry]:
