@@ -2,7 +2,7 @@ import json
 import os
 
 from aw_api import API
-from aw_api.structs import BattalionSearchResultEntry
+from aw_api.dataobjects import BattalionSearchResultEntry
 
 # TODO: Coverage 95%+ of main API module
 if os.getenv('HOME'):

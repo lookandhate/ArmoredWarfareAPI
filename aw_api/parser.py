@@ -23,7 +23,7 @@ SOFTWARE.
 
 """
 
-from .structs.player import PlayerStatistics
+from .dataobjects.player import PlayerStatistics
 from .exceptions import NotAuthException, UserNotFoundException, UserHasClosedStatisticsException, BattalionNotFound
 
 import re

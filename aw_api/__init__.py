@@ -12,7 +12,7 @@ Parser simulating API for ArmoredWarfare players statistics.
 from .client import API, AW
 from .async_client import AIOClient
 from .enums import GameMode
-from .structs import *
+from .dataobjects import *
 
 import aw_api.exceptions
 

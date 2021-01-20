@@ -29,7 +29,7 @@ import warnings
 
 from .exceptions import BadHTTPStatusCode, BattalionSearchTooShortQuery, BattalionSearchBattalionNotFound
 
-from .structs import PlayerStatistics, BattalionMemberEntry, BattalionSearchResultEntry
+from .dataobjects import PlayerStatistics, BattalionMemberEntry, BattalionSearchResultEntry
 from .parser import Parser
 from .enums import GameMode
 

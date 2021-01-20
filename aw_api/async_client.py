@@ -23,7 +23,7 @@ SOFTWARE.
 
 """
 
-from structs import *
+from dataobjects import *
 from .enums import GameMode
 from .parser import Parser
 
