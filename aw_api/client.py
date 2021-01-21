@@ -41,6 +41,12 @@ __all__ = ['Client', 'API', 'AW']
 
 
 class Client:
+    """
+
+    deprecated:: 3.0
+    Use AIOClient instead
+
+    """
     def __init__(self, raw_cookie: Optional[List[Dict]] = None):
         """
         :param raw_cookie :class:`Optional[Dict, List]`
@@ -170,6 +176,7 @@ class Client:
         :raises :exc:`BattalionSearchBattalionNotFound` if battalion with given name was not found
 
         versionadded:: 1.1
+
 
         :param battalion_name:
         :return: :class:`List[BattalionSearchResultEntry]`

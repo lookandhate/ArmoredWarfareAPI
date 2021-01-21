@@ -38,6 +38,13 @@ __all__ = ['AIOClient']
 
 
 class AIOClient:
+    """
+    Asynchronous implementation of client.
+    Use this one for your discord bots or async web-apps in order to achieve more compatibility
+    with asynchronous frameworks.
+
+    versionadded:: 2.0
+    """
     def __init__(self, raw_cookie: Optional[List[Dict]] = None):
         """
 
@@ -61,10 +68,10 @@ class AIOClient:
         self.__session: aiohttp.ClientSession = aiohttp.ClientSession(cookies=self.__cookie)
         self.__parser: Parser = Parser()
 
-    def __del__(self):
-        event_loop = asyncio.get_event_loop()
-
-        event_loop.run_until_complete(self.__session.close())
+    async def close(self):
+        if self.__session.closed:
+            pass
+        await self.__session.close()
 
     @staticmethod
     def __prepare_cookie(raw_cookie: Union[Dict, List]) -> Dict:
@@ -81,6 +88,7 @@ class AIOClient:
 
     async def __get_page(self, page_url: str):
         request = await self.__session.get(url=page_url)
+
         if request.status == 200:
             return await request.text()
         else:
