@@ -23,7 +23,7 @@ SOFTWARE.
 
 """
 
-from dataobjects import *
+from .dataobjects import *
 from .enums import GameMode
 from .parser import Parser
 
@@ -69,9 +69,17 @@ class AIOClient:
         self.__parser: Parser = Parser()
 
     async def close(self):
+        """
+        Closes session if it's not closed yet
+        Please, call this when you done using class
+        :return: None
+        """
         if self.__session.closed:
-            pass
+            return
         await self.__session.close()
+
+    def __del__(self):
+        asyncio.ensure_future(self.close())
 
     @staticmethod
     def __prepare_cookie(raw_cookie: Union[Dict, List]) -> Dict:
