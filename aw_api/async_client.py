@@ -26,6 +26,7 @@ SOFTWARE.
 from .dataobjects import *
 from .enums import GameMode
 from .parser import Parser
+from .exceptions import BadHTTPStatusCode
 
 import logging
 import aiohttp
@@ -67,6 +68,7 @@ class AIOClient:
         # Session that will contain cookies
         self.__session: aiohttp.ClientSession = aiohttp.ClientSession(cookies=self.__cookie)
         self.__parser: Parser = Parser()
+        logger.info(f'Initialized AIOClient. Is with cookies: {raw_cookie is not None}')
 
     async def close(self):
         """
@@ -96,11 +98,11 @@ class AIOClient:
 
     async def __get_page(self, page_url: str):
         request = await self.__session.get(url=page_url)
-
+        logger.info('Performing request to {0}'.format(page_url))
         if request.status == 200:
             return await request.text()
-        else:
-            return None
+        logger.error('Got non 200 status code on request to {0}. Status code: {1}'.format(page_url, request.status))
+        raise BadHTTPStatusCode(f'Got non 200 status code: {request.status}', status_code=request.status)
 
     async def __get_player_statistic_page(self, nickname: str, mode: int, data: int, tank_id: int, day: int = 0,
                                           ajax: int = 0, maintype: int = 0) -> str:
@@ -153,7 +155,7 @@ class AIOClient:
         Retrieves battalion players by given battalion ID
 
         :param battalion_id: ID of battalion
-        :return: list of players in this battalion
+        :return: :class:`List[BattalionMemberEntry]`
         """
 
         # TODO: Optimize that algorithm, so we would need to iterate over list two times here and in page parser method

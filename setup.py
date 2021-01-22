@@ -11,7 +11,7 @@ requirements = []
 setup(
     name='aw_api',
     version=__version__,
-    packages=['aw_api'],
+    packages=['aw_api', 'aw_api.dataobjects'],
     description='Armored Warfare unofficial API',
     long_description=long_description,
     long_description_content_type="text/markdown",

@@ -70,6 +70,8 @@ class Client:
         if raw_cookie:
             self.__cookie = self.__prepare_cookie(raw_cookie)
 
+        logger.info(f'Initialized Client. Is with cookies: {raw_cookie is not None}')
+
     @staticmethod
     def __prepare_cookie(raw_cookie: Union[Dict, List]) -> Dict:
         """

@@ -1,7 +1,8 @@
 import json
 import os
+import pytest
 
-from aw_api import API
+from aw_api import API, AIOClient
 from aw_api.dataobjects import BattalionSearchResultEntry
 
 # TODO: Coverage 95%+ of main API module
@@ -11,6 +12,7 @@ else:
     cookies = json.loads(open('cookies.json').read())
 
 client = API(cookies)
+aio_client = AIOClient(cookies)
 
 
 class TestGameMode:
