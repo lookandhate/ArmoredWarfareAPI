@@ -41,4 +41,37 @@ class PlayerStatistics:
     def __getitem__(self, item):
         return getattr(self, item)
 
+    def __eq__(self, other):
+
+        if not isinstance(other, PlayerStatistics):
+            return False
+
+        if self.clantag is None:
+            clantag = self.clantag is other.clantag
+        else:
+            clantag = self.clantag == other.clantag
+
+        if self.battalion_full is None:
+            battalion_full = self.battalion_full is other.battalion_full
+        else:
+            battalion_full = self.battalion_full == other.battalion_full
+
+        if self.average_level is None:
+            average_level = self.average_level is other.average_level
+        else:
+            average_level = self.average_level == other.average_level
+
+        return isinstance(other,
+                          PlayerStatistics) \
+               and other.winrate == self.winrate \
+               and other.battles == self.battles \
+               and other.damage == self.damage \
+               and clantag \
+               and battalion_full \
+               and other.average_spotting == self.average_spotting \
+               and other.average_kills == self.average_kills \
+               and average_level \
+               and other.nickname == self.nickname
+
+
 Player = PlayerStatistics
