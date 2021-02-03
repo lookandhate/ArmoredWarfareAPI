@@ -8,13 +8,14 @@ Parser simulating API for ArmoredWarfare players statistics.
 :license: MIT, see LICENSE for more details.
 
 """
-
-from .client import API, AW
+try:
+    from .client import API, AW
+except Exception:
+    pass
 from .async_client import AIOClient
 from .enums import GameMode
 from .dataobjects import *
 
 import aw_api.exceptions
 
-
-__version__ = '2.0.1'
+__version__ = '2.0.3'

@@ -1,12 +1,13 @@
 from setuptools import setup
 from os import path
 from aw_api import __version__
+
 this_directory = path.abspath(path.dirname(__file__))
 
 with open(path.join(this_directory, 'README.md'), encoding='utf-8') as f:
     long_description = f.read()
 
-requirements = []
+requirements = ['beautifulsoup4', 'aiohttp', 'requests']
 
 setup(
     name='aw_api',
@@ -19,7 +20,9 @@ setup(
     license='MIT',
     author='https://github.com/lookandhate',
     author_email='',
-    install_requires=['requests', 'beautifulsoup4'],
+    #install_requires=['beautifulsoup4', 'aiohttp', 'requests'],
+    install_requires=requirements,
+
     python_requires='>=3.7.0',
     keywords=['armored warfare', 'aw', 'armored warfare api', 'armata', 'армата'],
     classifiers=[
