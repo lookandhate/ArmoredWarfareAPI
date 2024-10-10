@@ -22,23 +22,14 @@ OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 SOFTWARE.
 
 """
-from dataclasses import dataclass
-from typing import Optional
+
+from enum import Enum
 
 
-@dataclass
-class PlayerStatistics:
-    winrate: float
-    battles: int
-    damage: float
-    clantag: Optional[str]
-    battalion_full: Optional[str]
-    average_spotting: float
-    average_kills: float
-    average_level: Optional[float]
-    nickname: str
-
-    def __getitem__(self, item):
-        return getattr(self, item)
-
-Player = PlayerStatistics
+class GameMode(Enum):
+    PVP = 0
+    PVE = 1
+    LOW = 2
+    GLOPS = 3
+    RANKED = 4
+    RB = RANKED
