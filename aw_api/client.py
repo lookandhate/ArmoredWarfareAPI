@@ -58,9 +58,9 @@ class Client:
         self.__parser: Parser = Parser()
 
         # Base URL for player statistics
-        self.__user_stats_url = 'https://armata.my.games/dynamic/user/?a=stats'
+        self.__user_stats_url = 'https://arwar.ru/dynamic/user/?a=stats'
         # Base URL for battalion page
-        self.__battalion_stats_url = 'https://armata.my.games/dynamic/aliance/index.php?a=index'
+        self.__battalion_stats_url = 'https://arwar.ru/dynamic/aliance/index.php?a=index'
 
         # Session that will contain cookies
         self.__session: requests.Session = requests.Session()

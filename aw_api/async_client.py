@@ -55,9 +55,9 @@ class AIOClient:
         """
 
         # Base URL for player statistics
-        self.__user_stats_url = 'https://armata.my.games/dynamic/user/?a=stats'
+        self.__user_stats_url = 'https://arwar.ru/dynamic/user/?a=stats'
         # Base URL for battalion page
-        self.__battalion_stats_url = 'https://armata.my.games/dynamic/aliance/index.php?a=index'
+        self.__battalion_stats_url = 'https://arwar.ru/dynamic/aliance/index.php?a=index'
 
         # Dict with cookies
         self.__cookie: Union[Dict, List, None] = None
